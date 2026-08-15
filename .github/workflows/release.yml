@@ -1,0 +1,170 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  FLUTTER_VERSION: "3.44.9"
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev \
+            libmpv-dev mpv liblzma-dev libasound2-dev
+          python3 -m pip install --quiet --break-system-packages pillow
+
+      - name: Package .deb and .tar.gz
+        run: ./scripts/package-linux.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: releases/*
+          if-no-files-found: error
+
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Package APK
+        run: ./scripts/package-android.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: releases/*.apk
+          if-no-files-found: error
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Build Windows release
+        run: flutter build windows --release
+
+      - name: Package zip and setup .exe
+        shell: bash
+        run: |
+          VERSION="$(sed -n 's/^version: *\([0-9.]*\).*/\1/p' pubspec.yaml | head -1)"
+          mkdir -p releases
+          BUNDLE="build/windows/x64/runner/Release"
+          powershell -Command "Compress-Archive -Path '$BUNDLE/*' -DestinationPath 'releases/acorn-player_${VERSION}_windows_x64.zip' -Force"
+          choco install innosetup -y --no-progress
+          "/c/Program Files (x86)/Inno Setup 6/ISCC.exe" //DAppVersion=$VERSION packaging/windows/acorn-player.iss
+          ls -l releases
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: releases/*
+          if-no-files-found: error
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Build macOS release
+        run: flutter build macos --release
+
+      - name: Package .dmg
+        run: |
+          VERSION="$(sed -n 's/^version: *\([0-9.]*\).*/\1/p' pubspec.yaml | head -1)"
+          APP="$(find build/macos/Build/Products/Release -maxdepth 1 -name '*.app' | head -1)"
+          mkdir -p releases dmg-stage
+          cp -R "$APP" "dmg-stage/Acorn Player.app"
+          brew install create-dmg
+          # create-dmg exits non-zero when it cannot codesign; the image is still written.
+          create-dmg \
+            --volname "Acorn Player" \
+            --window-size 660 420 \
+            --icon-size 110 \
+            --icon "Acorn Player.app" 170 190 \
+            --app-drop-link 470 190 \
+            "releases/acorn-player_${VERSION}_macos.dmg" \
+            "dmg-stage" || true
+          test -f "releases/acorn-player_${VERSION}_macos.dmg"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: releases/*.dmg
+          if-no-files-found: error
+
+  ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Build unsigned .ipa
+        run: |
+          VERSION="$(sed -n 's/^version: *\([0-9.]*\).*/\1/p' pubspec.yaml | head -1)"
+          flutter build ios --release --no-codesign
+          mkdir -p releases Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/
+          zip -qry "releases/acorn-player_${VERSION}_ios_unsigned.ipa" Payload
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios
+          path: releases/*.ipa
+          if-no-files-found: error
+
+  publish:
+    needs: [linux, android, windows, macos, ios]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Attach artifacts to the release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
