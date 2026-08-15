@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
+import '../theme/acorn_palette.dart';
 import '../theme/neu_style.dart';
 
 /// Round soft-UI button. Presses shorten the shadow so the button sinks in.
@@ -13,7 +13,7 @@ class NeuIconButton extends StatefulWidget {
     this.iconSize = 20,
     this.depth = 5,
     this.blur = 10,
-    this.iconColor = AppColors.icon,
+    this.iconColor,
     this.fill,
     this.glowColor,
   });
@@ -24,7 +24,7 @@ class NeuIconButton extends StatefulWidget {
   final double iconSize;
   final double depth;
   final double blur;
-  final Color iconColor;
+  final Color? iconColor;
 
   /// Solid background instead of the neumorphic sheen (used by the play button).
   final Color? fill;
@@ -45,6 +45,7 @@ class _NeuIconButtonState extends State<NeuIconButton> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final depth = _pressed ? widget.depth * 0.4 : widget.depth;
     final glow = widget.glowColor;
 
@@ -60,9 +61,9 @@ class _NeuIconButtonState extends State<NeuIconButton> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: widget.fill,
-          gradient: widget.fill == null ? NeuStyle.surfaceGradient : null,
+          gradient: widget.fill == null ? palette.surfaceGradient : null,
           boxShadow: [
-            ...NeuStyle.raised(depth: depth, blur: widget.blur),
+            ...NeuStyle.raised(depth: depth, blur: widget.blur, palette: palette),
             if (glow != null)
               ...NeuStyle.glow(glow, blur: widget.size * 0.55, spread: -2),
           ],
@@ -71,7 +72,7 @@ class _NeuIconButtonState extends State<NeuIconButton> {
           child: Icon(
             widget.icon,
             size: widget.iconSize,
-            color: widget.iconColor,
+            color: widget.iconColor ?? palette.icon,
           ),
         ),
       ),

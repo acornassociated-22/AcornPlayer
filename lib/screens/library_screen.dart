@@ -4,13 +4,13 @@ import 'package:provider/provider.dart';
 import '../models/song.dart';
 import '../state/library_controller.dart';
 import '../state/player_controller.dart';
-import '../theme/app_colors.dart';
-import '../theme/app_text_styles.dart';
-import '../theme/neu_style.dart';
+import '../state/settings_controller.dart';
+import '../theme/acorn_palette.dart';
 import '../widgets/action_sheet.dart';
 import '../widgets/app_top_bar.dart';
 import '../widgets/mini_player.dart';
 import '../widgets/neu_icon_button.dart';
+import '../widgets/settings_panel.dart';
 import '../widgets/song_grid_card.dart';
 import '../widgets/song_tile.dart';
 import '../widgets/vertical_tab_rail.dart';
@@ -23,13 +23,17 @@ const _wideBreakpoint = 600.0;
 class LibraryScreen extends StatelessWidget {
   const LibraryScreen({super.key});
 
-  static const _tabLabels = ['Albums', 'Playlists', 'Songs', 'Favorites'];
-
   @override
   Widget build(BuildContext context) {
     final library = context.watch<LibraryController>();
     final player = context.watch<PlayerController>();
     final wide = MediaQuery.sizeOf(context).width >= _wideBreakpoint;
+    final labels = [
+      context.t('albums'),
+      context.t('playlists'),
+      context.t('songs'),
+      context.t('favorites'),
+    ];
 
     final main = _LibraryMain(
       library: library,
@@ -39,7 +43,9 @@ class LibraryScreen extends StatelessWidget {
     );
 
     return Scaffold(
-      backgroundColor: wide ? NeuStyle.dockFill : AppColors.background,
+      backgroundColor: wide
+          ? context.palette.surface
+          : context.palette.background,
       body: SafeArea(
         bottom: false,
         left: !wide,
@@ -48,10 +54,11 @@ class LibraryScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   VerticalTabRail(
-                    labels: _tabLabels,
+                    labels: labels,
                     selectedIndex: library.tab.index,
                     onSelected: (index) =>
                         library.selectTab(LibraryTab.values[index]),
+                    onSettings: () => SettingsPanel.open(context),
                     dock: true,
                   ),
                   Expanded(child: main),
@@ -65,21 +72,21 @@ class LibraryScreen extends StatelessWidget {
   void _showMenu(BuildContext context, LibraryController library) {
     showActionSheet(
       context,
-      title: 'Library',
+      title: context.t('library'),
       items: [
         ActionSheetItem(
           icon: Icons.playlist_add_rounded,
-          label: 'New playlist',
+          label: context.t('newPlaylist'),
           onTap: () => _createPlaylist(context, library),
         ),
         ActionSheetItem(
           icon: Icons.refresh_rounded,
-          label: 'Rescan library',
+          label: context.t('rescanLibrary'),
           onTap: library.refresh,
         ),
         ActionSheetItem(
           icon: Icons.folder_open_rounded,
-          label: 'Change music folder',
+          label: context.t('changeMusicFolder'),
           onTap: library.pickFolder,
         ),
       ],
@@ -90,7 +97,7 @@ class LibraryScreen extends StatelessWidget {
     BuildContext context,
     LibraryController library,
   ) async {
-    final name = await showNamePrompt(context, title: 'New playlist');
+    final name = await showNamePrompt(context, title: context.t('newPlaylist'));
     if (name == null || name.isEmpty) return;
     await library.createPlaylist(name);
   }
@@ -133,7 +140,7 @@ class _LibraryMain extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.fromLTRB(28, 18, 28, 6),
                         child: AppTopBar(
-                          title: library.title,
+                          title: library.titleFor(context.strings),
                           onBack: library.canGoBack ? library.goBack : null,
                           onMore: onMenu,
                           trailing: _layoutToggle(library),
@@ -157,7 +164,7 @@ class _LibraryMain extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(22, 34, 22, 6),
                       child: AppTopBar(
-                        title: library.title,
+                        title: library.titleFor(context.strings),
                         onBack: library.canGoBack ? library.goBack : null,
                         onMore: onMenu,
                         trailing: _layoutToggle(library),
@@ -167,10 +174,16 @@ class _LibraryMain extends StatelessWidget {
                       child: Row(
                         children: [
                           VerticalTabRail(
-                            labels: LibraryScreen._tabLabels,
+                            labels: [
+                              context.t('albums'),
+                              context.t('playlists'),
+                              context.t('songs'),
+                              context.t('favorites'),
+                            ],
                             selectedIndex: library.tab.index,
                             onSelected: (index) =>
                                 library.selectTab(LibraryTab.values[index]),
+                            onSettings: () => SettingsPanel.open(context),
                           ),
                           Expanded(
                             child: _Body(library: library, player: player),
@@ -225,7 +238,7 @@ class _ChromeWell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        const ColoredBox(color: AppColors.background, child: SizedBox.expand()),
+        ColoredBox(color: context.palette.background, child: const SizedBox.expand()),
         child,
         const Positioned(
           left: 0,
@@ -289,20 +302,20 @@ class _Body extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (library.status) {
       case LibraryStatus.loading:
-        return const Center(
-          child: CircularProgressIndicator(color: AppColors.accent),
+        return Center(
+          child: CircularProgressIndicator(color: context.palette.accent),
         );
       case LibraryStatus.needsPermission:
         return _Notice(
-          message: 'Acorn Player needs access to your music to continue.',
-          actionLabel: 'Grant access',
+          message: context.t('needsPermission'),
+          actionLabel: context.t('grantAccess'),
           actionIcon: Icons.lock_open_rounded,
           onAction: library.initialise,
         );
       case LibraryStatus.needsFolder:
         return _Notice(
-          message: 'Pick the folder that holds your music.',
-          actionLabel: 'Choose folder',
+          message: context.t('needsFolder'),
+          actionLabel: context.t('chooseFolder'),
           onAction: library.pickFolder,
         );
       case LibraryStatus.ready:
@@ -327,11 +340,11 @@ class _SongList extends StatelessWidget {
     if (songs.isEmpty) {
       return _Notice(
         message: library.tab == LibraryTab.favorites || library.likedOnly
-            ? 'No favorite songs yet.'
-            : 'No playable audio files found here.',
+            ? context.t('noFavorites')
+            : context.t('noAudio'),
         actionLabel: library.tab == LibraryTab.favorites || library.likedOnly
             ? null
-            : 'Choose folder',
+            : context.t('chooseFolder'),
         onAction: library.tab == LibraryTab.favorites || library.likedOnly
             ? null
             : library.pickFolder,
@@ -386,14 +399,14 @@ class _SongList extends StatelessWidget {
               ? Icons.favorite_border
               : Icons.favorite_rounded,
           label: library.isLiked(song)
-              ? 'Remove from favorites'
-              : 'Add to favorites',
+              ? context.t('removeFromFavorites')
+              : context.t('addToFavorites'),
           onTap: () => library.toggleLike(song),
         ),
         for (final playlist in library.playlists)
           ActionSheetItem(
             icon: Icons.playlist_add_rounded,
-            label: 'Add to ${playlist.name}',
+            label: context.t('addTo', {'name': playlist.name}),
             onTap: () => library.addToPlaylist(playlist.id, song),
           ),
       ],
@@ -449,7 +462,7 @@ class _AlbumList extends StatelessWidget {
   Widget build(BuildContext context) {
     final albums = library.albums;
     if (albums.isEmpty) {
-      return const _Notice(message: 'No album tags in your library yet.');
+      return _Notice(message: context.t('noAlbums'));
     }
 
     return ListView.builder(
@@ -457,7 +470,9 @@ class _AlbumList extends StatelessWidget {
       itemCount: albums.length,
       itemBuilder: (context, index) => _CollectionRow(
         title: albums[index],
-        subtitle: '${library.songCountInAlbum(albums[index])} songs',
+        subtitle: context.t('songsCount', {
+          'count': '${library.songCountInAlbum(albums[index])}',
+        }),
         onTap: () => library.openAlbum(albums[index]),
       ),
     );
@@ -473,9 +488,7 @@ class _PlaylistList extends StatelessWidget {
   Widget build(BuildContext context) {
     final playlists = library.playlists;
     if (playlists.isEmpty) {
-      return const _Notice(
-        message: 'Create a playlist from the menu at the top right.',
-      );
+      return _Notice(message: context.t('noPlaylists'));
     }
 
     return ListView.builder(
@@ -483,7 +496,7 @@ class _PlaylistList extends StatelessWidget {
       itemCount: playlists.length,
       itemBuilder: (context, index) => _CollectionRow(
         title: playlists[index].name,
-        subtitle: 'Playlist',
+        subtitle: context.t('playlist'),
         onTap: () => library.openPlaylist(playlists[index].id),
       ),
     );
@@ -518,17 +531,17 @@ class _CollectionRow extends StatelessWidget {
                     title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.listTitle,
+                    style: context.styleListTitle,
                   ),
                   const SizedBox(height: 3),
-                  Text(subtitle, style: AppTextStyles.listSubtitle),
+                  Text(subtitle, style: context.styleListSubtitle),
                 ],
               ),
             ),
-            const Icon(
+            Icon(
               Icons.chevron_right,
               size: 20,
-              color: AppColors.textSecondary,
+              color: context.palette.textSecondary,
             ),
           ],
         ),
@@ -561,7 +574,7 @@ class _Notice extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: AppTextStyles.listSubtitle,
+              style: context.styleListSubtitle,
             ),
             if (actionLabel != null && onAction != null) ...[
               const SizedBox(height: 20),
@@ -572,7 +585,7 @@ class _Notice extends StatelessWidget {
                   children: [
                     NeuIconButton(icon: actionIcon),
                     const SizedBox(width: 12),
-                    Text(actionLabel!, style: AppTextStyles.listTitle),
+                    Text(actionLabel!, style: context.styleListTitle),
                   ],
                 ),
               ),

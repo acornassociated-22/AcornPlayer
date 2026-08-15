@@ -1,6 +1,6 @@
 import 'package:flutter/painting.dart';
 
-import 'app_colors.dart';
+import 'acorn_palette.dart';
 
 /// Shared radii and shadow recipes for the soft-UI (neumorphic) look.
 abstract final class NeuStyle {
@@ -9,32 +9,46 @@ abstract final class NeuStyle {
   static const double radiusTile = 18;
 
   /// Raised element: dark shadow bottom-right, light highlight top-left.
-  static List<BoxShadow> raised({double depth = 6, double blur = 14}) => [
-    BoxShadow(
-      color: AppColors.shadowDark,
-      offset: Offset(depth, depth),
-      blurRadius: blur,
-    ),
-    BoxShadow(
-      color: AppColors.shadowLight,
-      offset: Offset(-depth, -depth),
-      blurRadius: blur,
-    ),
-  ];
+  static List<BoxShadow> raised({
+    double depth = 6,
+    double blur = 14,
+    AcornPalette? palette,
+  }) {
+    final colors = palette ?? AcornPalette.dark;
+    return [
+      BoxShadow(
+        color: colors.shadowDark,
+        offset: Offset(depth, depth),
+        blurRadius: blur,
+      ),
+      BoxShadow(
+        color: colors.shadowLight,
+        offset: Offset(-depth, -depth),
+        blurRadius: blur,
+      ),
+    ];
+  }
 
   /// Pressed element: the light source flips so the surface reads as sunken.
-  static List<BoxShadow> sunken({double depth = 3, double blur = 6}) => [
-    BoxShadow(
-      color: AppColors.shadowLight,
-      offset: Offset(depth, depth),
-      blurRadius: blur,
-    ),
-    BoxShadow(
-      color: AppColors.shadowDark,
-      offset: Offset(-depth, -depth),
-      blurRadius: blur,
-    ),
-  ];
+  static List<BoxShadow> sunken({
+    double depth = 3,
+    double blur = 6,
+    AcornPalette? palette,
+  }) {
+    final colors = palette ?? AcornPalette.dark;
+    return [
+      BoxShadow(
+        color: colors.shadowLight,
+        offset: Offset(depth, depth),
+        blurRadius: blur,
+      ),
+      BoxShadow(
+        color: colors.shadowDark,
+        offset: Offset(-depth, -depth),
+        blurRadius: blur,
+      ),
+    ];
+  }
 
   /// Shared fill of the left dock and the bottom player bar.
   static const Color dockFill = Color(0xFF2E2E2E);
@@ -48,31 +62,40 @@ abstract final class NeuStyle {
   static List<BoxShadow> dockEdge({
     double blur = 28,
     Offset offset = const Offset(6, 0),
-  }) => [
-    BoxShadow(
-      color: AppColors.shadowDark.withValues(alpha: 0.75),
-      offset: offset,
-      blurRadius: blur,
-      spreadRadius: 2,
-    ),
-    BoxShadow(
-      color: AppColors.shadowLight.withValues(alpha: 0.06),
-      offset: Offset(-offset.dx * 0.33, -offset.dy * 0.33),
-      blurRadius: blur * 0.35,
-    ),
-  ];
+    AcornPalette? palette,
+  }) {
+    final colors = palette ?? AcornPalette.dark;
+    return [
+      BoxShadow(
+        color: colors.shadowDark.withValues(alpha: 0.75),
+        offset: offset,
+        blurRadius: blur,
+        spreadRadius: 2,
+      ),
+      BoxShadow(
+        color: colors.shadowLight.withValues(alpha: 0.06),
+        offset: Offset(-offset.dx * 0.33, -offset.dy * 0.33),
+        blurRadius: blur * 0.35,
+      ),
+    ];
+  }
 
   /// Left rail and bottom bar share this so they read as one piece.
-  static BoxDecoration dockPanel({required Offset shadowOffset}) =>
-      BoxDecoration(
-        color: dockFill,
-        boxShadow: dockEdge(offset: shadowOffset),
-        border: Border(
-          right: shadowOffset.dx > 0 ? dockDivider : BorderSide.none,
-          top: shadowOffset.dy < 0 ? dockDivider : BorderSide.none,
-          bottom: shadowOffset.dy > 0 ? dockDivider : BorderSide.none,
-        ),
-      );
+  static BoxDecoration dockPanel({
+    required Offset shadowOffset,
+    AcornPalette? palette,
+  }) {
+    final colors = palette ?? AcornPalette.dark;
+    return BoxDecoration(
+      color: colors.surface,
+      boxShadow: dockEdge(offset: shadowOffset, palette: colors),
+      border: Border(
+        right: shadowOffset.dx > 0 ? dockDivider : BorderSide.none,
+        top: shadowOffset.dy < 0 ? dockDivider : BorderSide.none,
+        bottom: shadowOffset.dy > 0 ? dockDivider : BorderSide.none,
+      ),
+    );
+  }
 
   /// Two-layer coloured halo: a tight core plus a wide bloom.
   static List<BoxShadow> glow(

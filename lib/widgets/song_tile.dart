@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/song.dart';
-import '../theme/app_colors.dart';
-import '../theme/app_text_styles.dart';
+import '../theme/acorn_palette.dart';
 import '../theme/neu_style.dart';
 import 'neu_container.dart';
 import 'waveform_indicator.dart';
@@ -41,14 +40,14 @@ class SongTile extends StatelessWidget {
                 song.artist,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.listTitle,
+                style: context.styleListTitle,
               ),
               const SizedBox(height: 3),
               Text(
                 song.title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.listSubtitle,
+                style: context.styleListSubtitle,
               ),
             ],
           ),
@@ -96,10 +95,10 @@ class _MoreButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: const SizedBox(
+      child: SizedBox(
         width: 28,
         height: 28,
-        child: Icon(Icons.more_horiz, size: 20, color: AppColors.icon),
+        child: Icon(Icons.more_horiz, size: 20, color: context.palette.icon),
       ),
     );
   }

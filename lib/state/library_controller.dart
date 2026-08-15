@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../data/database.dart';
+import '../l10n/app_strings.dart';
 import '../models/song.dart';
 import '../services/library/library_source.dart';
 
@@ -49,6 +50,8 @@ class LibraryController extends ChangeNotifier {
 
   int? get selectedPlaylistId => _selectedPlaylistId;
 
+  String? get folder => _folder;
+
   bool get canGoBack => _selectedAlbum != null || _selectedPlaylistId != null;
 
   LibraryView get view {
@@ -62,21 +65,25 @@ class LibraryController extends ChangeNotifier {
   }
 
   /// Title shown in the app bar, mirroring the current selection.
-  String get title {
+  String titleFor(AppStrings strings) {
     if (_selectedAlbum != null) return _selectedAlbum!;
     if (_selectedPlaylistId != null) {
       for (final playlist in _playlists) {
         if (playlist.id == _selectedPlaylistId) return playlist.name;
       }
-      return 'Playlist';
+      return strings['playlist'];
     }
     return switch (_tab) {
-      LibraryTab.albums => 'Albums',
-      LibraryTab.playlists => 'Playlists',
-      LibraryTab.songs => _likedOnly ? 'Liked Songs' : 'All Songs',
-      LibraryTab.favorites => 'Favorites',
+      LibraryTab.albums => strings['albums'],
+      LibraryTab.playlists => strings['playlists'],
+      LibraryTab.songs =>
+        _likedOnly ? strings['likedSongs'] : strings['allSongs'],
+      LibraryTab.favorites => strings['favorites'],
     };
   }
+
+  /// English title used by tests and callers without a locale.
+  String get title => titleFor(AppStrings.en);
 
   List<String> get albums {
     final names = _songs

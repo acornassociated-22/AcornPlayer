@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../services/app_platform.dart';
-import '../theme/neu_style.dart';
+import '../theme/acorn_palette.dart';
 import 'desktop_title_bar.dart';
 
 /// Mobile renders the screens full bleed; desktop puts the very same screens in
@@ -18,7 +18,7 @@ class AppShell extends StatelessWidget {
 
     // Material gives the caption bar above the navigator a real text style.
     final window = Material(
-      color: NeuStyle.dockFill,
+      color: context.palette.surface,
       child: Column(
         children: [const DesktopTitleBar(), Expanded(child: child)],
       ),

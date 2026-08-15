@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-import '../theme/app_colors.dart';
+import '../theme/acorn_palette.dart';
 import '../theme/neu_style.dart';
 
 /// Soft-UI surface: a flat panel lifted off the background by a dark shadow on
@@ -41,22 +41,23 @@ class NeuContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Container(
       width: width,
       height: height,
       padding: padding,
       decoration: BoxDecoration(
-        color: gradient ? null : (color ?? AppColors.surface),
+        color: gradient ? null : (color ?? palette.surface),
         gradient: gradient
-            ? (sunken ? NeuStyle.sunkenGradient : NeuStyle.surfaceGradient)
+            ? (sunken ? palette.sunkenGradient : palette.surfaceGradient)
             : null,
         shape: circle ? BoxShape.circle : BoxShape.rectangle,
         borderRadius: circle ? null : BorderRadius.circular(radius),
         boxShadow: [
           if (sunken)
-            ...NeuStyle.sunken(depth: depth, blur: blur)
+            ...NeuStyle.sunken(depth: depth, blur: blur, palette: palette)
           else
-            ...NeuStyle.raised(depth: depth, blur: blur),
+            ...NeuStyle.raised(depth: depth, blur: blur, palette: palette),
           ...?glow,
         ],
       ),

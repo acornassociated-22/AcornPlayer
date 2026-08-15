@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
-import '../theme/app_text_styles.dart';
+import '../theme/acorn_palette.dart';
 import 'neu_icon_button.dart';
 
 /// Shared header: round back button, centred title, round overflow button.
@@ -34,7 +33,7 @@ class AppTopBar extends StatelessWidget {
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.appBarTitle,
+            style: context.styleAppBarTitle,
           ),
         ),
         if (trailing != null) ...[
@@ -44,7 +43,6 @@ class AppTopBar extends StatelessWidget {
         NeuIconButton(
           icon: Icons.more_horiz,
           iconSize: 20,
-          iconColor: AppColors.icon,
           onPressed: onMore,
         ),
       ],

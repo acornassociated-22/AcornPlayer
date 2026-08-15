@@ -3,8 +3,7 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
-import '../theme/app_text_styles.dart';
+import '../theme/acorn_palette.dart';
 
 /// WhatsApp / Signal style seek bar: a waveform that fills as the track plays,
 /// with a glass reflection underneath.
@@ -81,8 +80,8 @@ class _TrackProgressBarState extends State<TrackProgressBar>
     final times = Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(formatDuration(widget.position), style: AppTextStyles.time),
-        Text(formatDuration(widget.duration), style: AppTextStyles.time),
+        Text(formatDuration(widget.position), style: context.styleTime),
+        Text(formatDuration(widget.duration), style: context.styleTime),
       ],
     );
 
@@ -107,6 +106,8 @@ class _TrackProgressBarState extends State<TrackProgressBar>
                       samples: waveformSamples(widget.seed),
                       progress: progress,
                       pulse: widget.isPlaying ? _pulse.value : 0,
+                      accent: context.palette.accent,
+                      inactive: context.palette.trackInactive,
                     ),
                   ),
                 ),
@@ -142,11 +143,15 @@ class _WavePainter extends CustomPainter {
     required this.samples,
     required this.progress,
     required this.pulse,
+    required this.accent,
+    required this.inactive,
   });
 
   final List<double> samples;
   final double progress;
   final double pulse;
+  final Color accent;
+  final Color inactive;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -165,7 +170,7 @@ class _WavePainter extends CustomPainter {
       final h = waveHeight * sample * live;
       final x = i * stride;
       final played = t <= progress;
-      final color = played ? AppColors.accent : AppColors.trackInactive;
+      final color = played ? accent : inactive;
 
       final bar = RRect.fromLTRBR(
         x,
@@ -218,7 +223,9 @@ class _WavePainter extends CustomPainter {
   bool shouldRepaint(_WavePainter old) =>
       old.progress != progress ||
       old.pulse != pulse ||
-      old.samples != samples;
+      old.samples != samples ||
+      old.accent != accent ||
+      old.inactive != inactive;
 }
 
 /// Formats as `m:ss`, or `h:mm:ss` for tracks over an hour.

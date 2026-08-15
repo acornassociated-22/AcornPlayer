@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../theme/acorn_palette.dart';
 import '../theme/app_colors.dart';
-import '../theme/app_text_styles.dart';
 import 'neu_icon_button.dart';
 
 /// Caption bar of the frameless desktop window: drags the window, double-tap
@@ -31,7 +31,7 @@ class DesktopTitleBar extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
-                const Text('Acorn Player', style: AppTextStyles.miniLabel),
+                Text('Acorn Player', style: context.styleMiniLabel),
                 const Spacer(),
                 NeuIconButton(
                   icon: Icons.remove_rounded,

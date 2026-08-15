@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
-import '../theme/app_text_styles.dart';
+import '../state/settings_controller.dart';
+import '../theme/acorn_palette.dart';
 import '../theme/neu_style.dart';
 
 class ActionSheetItem {
@@ -25,45 +25,48 @@ Future<void> showActionSheet(
   return showModalBottomSheet<void>(
     context: context,
     backgroundColor: Colors.transparent,
-    builder: (sheetContext) => Container(
-      decoration: BoxDecoration(
-        gradient: NeuStyle.surfaceGradient,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(NeuStyle.radiusCard),
-        ),
-      ),
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.appBarTitle,
+    builder: (sheetContext) {
+      final palette = sheetContext.palette;
+      return Container(
+        decoration: BoxDecoration(
+          gradient: palette.surfaceGradient,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(NeuStyle.radiusCard),
           ),
-          const SizedBox(height: 14),
-          for (final item in items)
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () {
-                Navigator.of(sheetContext).pop();
-                item.onTap();
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 13),
-                child: Row(
-                  children: [
-                    Icon(item.icon, size: 19, color: AppColors.icon),
-                    const SizedBox(width: 14),
-                    Text(item.label, style: AppTextStyles.listTitle),
-                  ],
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: sheetContext.styleAppBarTitle,
+            ),
+            const SizedBox(height: 14),
+            for (final item in items)
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  item.onTap();
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 13),
+                  child: Row(
+                    children: [
+                      Icon(item.icon, size: 19, color: palette.icon),
+                      const SizedBox(width: 14),
+                      Text(item.label, style: sheetContext.styleListTitle),
+                    ],
+                  ),
                 ),
               ),
-            ),
-        ],
-      ),
-    ),
+          ],
+        ),
+      );
+    },
   );
 }
 
@@ -73,22 +76,23 @@ Future<String?> showNamePrompt(
   required String title,
 }) {
   final controller = TextEditingController();
+  final palette = context.palette;
 
   return showDialog<String>(
     context: context,
     builder: (dialogContext) => AlertDialog(
-      backgroundColor: AppColors.surface,
-      title: Text(title, style: AppTextStyles.appBarTitle),
+      backgroundColor: dialogContext.palette.surface,
+      title: Text(title, style: dialogContext.styleAppBarTitle),
       content: TextField(
         controller: controller,
         autofocus: true,
-        style: AppTextStyles.listTitle,
-        cursorColor: AppColors.accent,
-        decoration: const InputDecoration(
-          hintText: 'Name',
-          hintStyle: AppTextStyles.listSubtitle,
+        style: dialogContext.styleListTitle,
+        cursorColor: palette.accent,
+        decoration: InputDecoration(
+          hintText: dialogContext.t('name'),
+          hintStyle: dialogContext.styleListSubtitle,
           focusedBorder: UnderlineInputBorder(
-            borderSide: BorderSide(color: AppColors.accent),
+            borderSide: BorderSide(color: palette.accent),
           ),
         ),
         onSubmitted: (value) => Navigator.of(dialogContext).pop(value.trim()),
@@ -96,15 +100,18 @@ Future<String?> showNamePrompt(
       actions: [
         TextButton(
           onPressed: () => Navigator.of(dialogContext).pop(),
-          child: const Text(
-            'Cancel',
-            style: TextStyle(color: AppColors.textSecondary),
+          child: Text(
+            dialogContext.t('cancel'),
+            style: TextStyle(color: dialogContext.palette.textSecondary),
           ),
         ),
         TextButton(
           onPressed: () =>
               Navigator.of(dialogContext).pop(controller.text.trim()),
-          child: const Text('Create', style: TextStyle(color: AppColors.accent)),
+          child: Text(
+            dialogContext.t('create'),
+            style: TextStyle(color: dialogContext.palette.accent),
+          ),
         ),
       ],
     ),

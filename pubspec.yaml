@@ -48,6 +48,9 @@ dependencies:
   # 13.x pulls permission_handler_android that requires compileSdk 37; 12.x stays on 35.
   permission_handler: ^12.0.3
   path_provider: ^2.1.6
+  url_launcher: ^6.3.2
+  flutter_localizations:
+    sdk: flutter
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -78,6 +81,7 @@ flutter:
   assets:
     - promo/app_icon.png
     - promo/cover_fallback.png
+    - assets/flags/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../state/player_controller.dart';
-import '../theme/app_colors.dart';
-import '../theme/app_text_styles.dart';
+import '../state/settings_controller.dart';
+import '../theme/acorn_palette.dart';
 import 'neu_container.dart';
 
 /// Recessed neumorphic well of tappable labels. Selected items glow red;
@@ -46,9 +46,9 @@ class PlaybackModeBar extends StatelessWidget {
                 ? Icons.repeat_one_rounded
                 : Icons.repeat_rounded,
             label: switch (repeat) {
-              QueueRepeat.off => 'Repeat',
-              QueueRepeat.all => 'Repeat all',
-              QueueRepeat.one => 'Repeat one',
+              QueueRepeat.off => context.t('repeat'),
+              QueueRepeat.all => context.t('repeatAll'),
+              QueueRepeat.one => context.t('repeatOne'),
             },
             active: repeat != QueueRepeat.off,
             compact: compact,
@@ -57,7 +57,7 @@ class PlaybackModeBar extends StatelessWidget {
           SizedBox(width: compact ? 12 : 18),
           _ModeLabel(
             icon: Icons.shuffle_rounded,
-            label: 'Shuffle',
+            label: context.t('shuffle'),
             active: shuffle,
             compact: compact,
             onTap: onToggleShuffle,
@@ -65,7 +65,9 @@ class PlaybackModeBar extends StatelessWidget {
           SizedBox(width: compact ? 12 : 18),
           _ModeLabel(
             icon: Icons.speed_rounded,
-            label: speed == 1 ? 'Speed' : '${_speedLabel(speed)} speed',
+            label: speed == 1
+                ? context.t('speed')
+                : context.t('speedN', {'n': _speedLabel(speed)}),
             active: speed != 1,
             compact: compact,
             onTap: onCycleSpeed,
@@ -93,8 +95,9 @@ class _ModeLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = active ? AppColors.accent : AppColors.textSecondary;
-    final style = (compact ? AppTextStyles.miniLabel : AppTextStyles.time)
+    final palette = context.palette;
+    final color = active ? palette.accent : palette.textSecondary;
+    final style = (compact ? context.styleMiniLabel : context.styleTime)
         .copyWith(
           color: color,
           fontWeight: active ? FontWeight.w700 : FontWeight.w500,
@@ -102,7 +105,7 @@ class _ModeLabel extends StatelessWidget {
           shadows: active
               ? [
                   Shadow(
-                    color: AppColors.accent.withValues(alpha: 0.85),
+                    color: palette.accent.withValues(alpha: 0.85),
                     blurRadius: 12,
                   ),
                 ]

@@ -2,9 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
-import '../theme/app_text_styles.dart';
-import '../theme/neu_style.dart';
+import '../theme/acorn_palette.dart';
 
 /// Rotary volume knob: a sunken ring with a glowing arc. The centre ticks
 /// through the percentage as the value changes.
@@ -66,7 +64,10 @@ class VolumeDial extends StatelessWidget {
               children: [
                 CustomPaint(
                   size: Size.square(size),
-                  painter: _DialPainter(value: animated),
+                  painter: _DialPainter(
+                    value: animated,
+                    palette: context.palette,
+                  ),
                 ),
                 Column(
                   mainAxisSize: MainAxisSize.min,
@@ -79,18 +80,18 @@ class VolumeDial extends StatelessWidget {
                           : Icons.volume_up_rounded,
                       size: size * 0.16,
                       color: muted
-                          ? AppColors.textSecondary
-                          : AppColors.icon,
+                          ? context.palette.textSecondary
+                          : context.palette.icon,
                     ),
                     const SizedBox(height: 2),
                     AnimatedDefaultTextStyle(
                       duration: const Duration(milliseconds: 180),
-                      style: AppTextStyles.listTitle.copyWith(
+                      style: context.styleListTitle.copyWith(
                         fontSize: size * 0.2,
                         fontWeight: FontWeight.w700,
                         color: muted
-                            ? AppColors.textSecondary
-                            : AppColors.textPrimary,
+                            ? context.palette.textSecondary
+                            : context.palette.textPrimary,
                       ),
                       child: Text('$percent%'),
                     ),
@@ -106,9 +107,10 @@ class VolumeDial extends StatelessWidget {
 }
 
 class _DialPainter extends CustomPainter {
-  const _DialPainter({required this.value});
+  const _DialPainter({required this.value, required this.palette});
 
   final double value;
+  final AcornPalette palette;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -122,25 +124,25 @@ class _DialPainter extends CustomPainter {
       center,
       radius + stroke * 0.7,
       Paint()
-        ..shader = NeuStyle.sunkenGradient.createShader(
+        ..shader = palette.sunkenGradient.createShader(
           Rect.fromCircle(center: center, radius: radius + stroke * 0.7),
         ),
     );
 
     final track = Paint()
-      ..color = AppColors.trackInactive.withValues(alpha: 0.35)
+      ..color = palette.trackInactive.withValues(alpha: 0.35)
       ..style = PaintingStyle.stroke
       ..strokeWidth = stroke
       ..strokeCap = StrokeCap.round;
 
     final active = Paint()
-      ..color = AppColors.accent
+      ..color = palette.accent
       ..style = PaintingStyle.stroke
       ..strokeWidth = stroke
       ..strokeCap = StrokeCap.round;
 
     final glow = Paint()
-      ..color = AppColors.accent.withValues(alpha: 0.35)
+      ..color = palette.accent.withValues(alpha: 0.35)
       ..style = PaintingStyle.stroke
       ..strokeWidth = stroke + 4
       ..strokeCap = StrokeCap.round
@@ -181,12 +183,13 @@ class _DialPainter extends CustomPainter {
       thumb,
       thumbR + 3,
       Paint()
-        ..color = AppColors.accent.withValues(alpha: 0.35)
+        ..color = palette.accent.withValues(alpha: 0.35)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
     );
-    canvas.drawCircle(thumb, thumbR, Paint()..color = AppColors.textPrimary);
+    canvas.drawCircle(thumb, thumbR, Paint()..color = palette.textPrimary);
   }
 
   @override
-  bool shouldRepaint(_DialPainter old) => old.value != value;
+  bool shouldRepaint(_DialPainter old) =>
+      old.value != value || old.palette != palette;
 }

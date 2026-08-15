@@ -11,6 +11,8 @@ import 'package:acorn_player/services/audio_player_service.dart';
 import 'package:acorn_player/services/library/library_source.dart';
 import 'package:acorn_player/state/library_controller.dart';
 import 'package:acorn_player/state/player_controller.dart';
+import 'package:acorn_player/state/settings_controller.dart';
+import 'package:acorn_player/theme/acorn_palette.dart';
 import 'package:acorn_player/theme/app_colors.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -168,6 +170,7 @@ Widget _harness({
         scaffoldBackgroundColor: AppColors.background,
         splashFactory: NoSplash.splashFactory,
         fontFamily: 'Roboto',
+        extensions: const [AcornPalette.dark],
       ),
       home: child,
     ),
@@ -178,6 +181,7 @@ void main() {
   late AppDatabase database;
   late LibraryController library;
   late PlayerController player;
+  late SettingsController settings;
 
   setUpAll(() async {
     await _loadFont('Roboto', [
@@ -196,6 +200,8 @@ void main() {
     database = AppDatabase(NativeDatabase.memory());
     library = LibraryController(database, _FakeLibrarySource());
     player = PlayerController(_FakeAudioService());
+    settings = SettingsController(database);
+    await settings.load();
     await library.initialise();
     // Third track, so the carousel shows a neighbour on both sides.
     await player.playQueue(_songs(), 2);
@@ -217,6 +223,7 @@ void main() {
           Provider<ArtworkCache>.value(
             value: ArtworkCache(_FakeLibrarySource()),
           ),
+          ChangeNotifierProvider<SettingsController>.value(value: settings),
           ChangeNotifierProvider<LibraryController>.value(value: library),
           ChangeNotifierProvider<PlayerController>.value(value: player),
         ],
@@ -246,6 +253,7 @@ void main() {
           Provider<ArtworkCache>.value(
             value: ArtworkCache(_FakeLibrarySource()),
           ),
+          ChangeNotifierProvider<SettingsController>.value(value: settings),
           ChangeNotifierProvider<LibraryController>.value(value: library),
           ChangeNotifierProvider<PlayerController>.value(value: player),
         ],

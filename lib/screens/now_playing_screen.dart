@@ -6,8 +6,9 @@ import 'package:provider/provider.dart';
 import '../models/song.dart';
 import '../state/library_controller.dart';
 import '../state/player_controller.dart';
+import '../state/settings_controller.dart';
+import '../theme/acorn_palette.dart';
 import '../theme/app_colors.dart';
-import '../theme/app_text_styles.dart';
 import '../widgets/action_sheet.dart';
 import '../widgets/album_carousel.dart';
 import '../widgets/app_top_bar.dart';
@@ -46,11 +47,14 @@ class NowPlayingScreen extends StatelessWidget {
     final song = player.current;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.palette.background,
       body: SafeArea(
         child: song == null
-            ? const Center(
-                child: Text('Nothing playing', style: AppTextStyles.trackArtist),
+            ? Center(
+                child: Text(
+                  context.t('nothingPlaying'),
+                  style: context.styleTrackArtist,
+                ),
               )
             : Stack(
                 fit: StackFit.expand,
@@ -171,14 +175,14 @@ class NowPlayingScreen extends StatelessWidget {
               ? Icons.favorite_border
               : Icons.favorite_rounded,
           label: library.isLiked(song)
-              ? 'Remove from favorites'
-              : 'Add to favorites',
+              ? context.t('removeFromFavorites')
+              : context.t('addToFavorites'),
           onTap: () => library.toggleLike(song),
         ),
         for (final playlist in library.playlists)
           ActionSheetItem(
             icon: Icons.playlist_add_rounded,
-            label: 'Add to ${playlist.name}',
+            label: context.t('addTo', {'name': playlist.name}),
             onTap: () => library.addToPlaylist(playlist.id, song),
           ),
       ],
@@ -260,7 +264,7 @@ class _TrackDetails extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
-                  style: AppTextStyles.trackTitle,
+                  style: context.styleTrackTitle,
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -268,7 +272,7 @@ class _TrackDetails extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
-                  style: AppTextStyles.trackArtist,
+                  style: context.styleTrackArtist,
                 ),
               ],
             ),

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../models/song.dart';
+import '../state/settings_controller.dart';
+import '../theme/acorn_palette.dart';
 import '../theme/app_colors.dart';
-import '../theme/app_text_styles.dart';
 import '../theme/neu_style.dart';
 import '../state/player_controller.dart';
 import 'home_indicator.dart';
@@ -80,6 +81,7 @@ class MiniPlayer extends StatelessWidget {
           ? null
           : NeuStyle.dockPanel(
               shadowOffset: const Offset(0, -6),
+              palette: context.palette,
             ).copyWith(
               borderRadius: isWide
                   ? null
@@ -184,20 +186,20 @@ class _TrackLabel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Now Playing', style: AppTextStyles.miniLabel),
+        Text(context.t('nowPlaying'), style: context.styleMiniLabel),
         const SizedBox(height: 5),
         Text(
           song.artist,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: AppTextStyles.listTitle,
+          style: context.styleListTitle,
         ),
         const SizedBox(height: 2),
         Text(
           song.title,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: AppTextStyles.listSubtitle,
+          style: context.styleListSubtitle,
         ),
       ],
     );

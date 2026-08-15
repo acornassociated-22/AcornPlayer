@@ -3,8 +3,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../models/song.dart';
+import '../theme/acorn_palette.dart';
 import '../theme/app_colors.dart';
-import '../theme/app_text_styles.dart';
 import '../theme/neu_style.dart';
 import 'neu_container.dart';
 
@@ -125,7 +125,11 @@ class _Platter extends StatelessWidget {
                   children: [
                     CustomPaint(
                       size: Size.square(size),
-                      painter: _GroovePainter(active: active),
+                      painter: _GroovePainter(
+                        active: active,
+                        accent: context.palette.accent,
+                        groove: context.palette.shadowDark,
+                      ),
                     ),
                     NeuContainer(
                       circle: true,
@@ -135,7 +139,7 @@ class _Platter extends StatelessWidget {
                       blur: 11,
                       glow: active
                           ? NeuStyle.glow(
-                              AppColors.accent,
+                              context.palette.accent,
                               blur: 16,
                               opacity: 0.55,
                             )
@@ -144,7 +148,9 @@ class _Platter extends StatelessWidget {
                         child: Icon(
                           Icons.music_note_rounded,
                           size: hub * 0.42,
-                          color: active ? AppColors.accent : AppColors.icon,
+                          color: active
+                              ? context.palette.accent
+                              : context.palette.icon,
                         ),
                       ),
                     ),
@@ -157,6 +163,7 @@ class _Platter extends StatelessWidget {
                   painter: _ProgressRingPainter(
                     progress: progress,
                     active: active,
+                    accent: context.palette.accent,
                   ),
                 ),
               ),
@@ -190,9 +197,9 @@ class _Nameplate extends StatelessWidget {
             song.title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.listTitle.copyWith(
+            style: context.styleListTitle.copyWith(
               fontSize: 13,
-              color: active ? AppColors.accent : AppColors.textPrimary,
+              color: active ? context.palette.accent : context.palette.textPrimary,
             ),
           ),
           const SizedBox(height: 3),
@@ -203,14 +210,14 @@ class _Nameplate extends StatelessWidget {
                   song.artist,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.listSubtitle,
+                  style: context.styleListSubtitle,
                 ),
               ),
               if (song.duration > Duration.zero) ...[
                 const SizedBox(width: 6),
                 Text(
                   _formatDuration(song.duration),
-                  style: AppTextStyles.time.copyWith(fontSize: 10),
+                  style: context.styleTime.copyWith(fontSize: 10),
                 ),
               ],
             ],
@@ -226,10 +233,12 @@ class _ProgressRingPainter extends CustomPainter {
   const _ProgressRingPainter({
     required this.progress,
     required this.active,
+    required this.accent,
   });
 
   final double progress;
   final bool active;
+  final Color accent;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -244,7 +253,7 @@ class _ProgressRingPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = stroke
       ..strokeCap = StrokeCap.round
-      ..color = AppColors.accent.withValues(alpha: 0.22);
+      ..color = accent.withValues(alpha: 0.22);
     canvas.drawCircle(center, radius, track);
 
     final sweep = 2 * math.pi * progress.clamp(0.0, 1.0);
@@ -254,20 +263,28 @@ class _ProgressRingPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = stroke
       ..strokeCap = StrokeCap.round
-      ..color = AppColors.accent;
+      ..color = accent;
     canvas.drawArc(rect, -math.pi / 2, sweep, false, fill);
   }
 
   @override
   bool shouldRepaint(_ProgressRingPainter oldDelegate) =>
-      oldDelegate.progress != progress || oldDelegate.active != active;
+      oldDelegate.progress != progress ||
+      oldDelegate.active != active ||
+      oldDelegate.accent != accent;
 }
 
 /// Fine concentric grooves on the platter.
 class _GroovePainter extends CustomPainter {
-  const _GroovePainter({required this.active});
+  const _GroovePainter({
+    required this.active,
+    required this.accent,
+    required this.groove,
+  });
 
   final bool active;
+  final Color accent;
+  final Color groove;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -278,7 +295,7 @@ class _GroovePainter extends CustomPainter {
       ..strokeWidth = 1;
     for (var i = 0; i < 7; i++) {
       final t = (i + 1) / 8;
-      paint.color = (active ? AppColors.accent : AppColors.shadowDark)
+      paint.color = (active ? accent : groove)
           .withValues(alpha: active ? 0.10 : 0.22);
       canvas.drawCircle(center, maxR * t, paint);
     }
@@ -286,7 +303,9 @@ class _GroovePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_GroovePainter oldDelegate) =>
-      oldDelegate.active != active;
+      oldDelegate.active != active ||
+      oldDelegate.accent != accent ||
+      oldDelegate.groove != groove;
 }
 
 /// Formats 3:05 from a duration.

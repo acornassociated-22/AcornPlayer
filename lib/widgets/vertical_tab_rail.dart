@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../theme/app_colors.dart';
+import '../state/settings_controller.dart';
+import '../theme/acorn_palette.dart';
 import '../theme/app_text_styles.dart';
 import 'neu_container.dart';
+import 'neu_icon_button.dart';
 
 /// Sideways tab strip. On narrow screens it is a floating pill; on wide screens
 /// it becomes a full-height dock pinned to the left edge.
@@ -12,6 +15,7 @@ class VerticalTabRail extends StatelessWidget {
     required this.labels,
     required this.selectedIndex,
     required this.onSelected,
+    this.onSettings,
     this.dock = false,
     this.width = 46,
   });
@@ -19,6 +23,7 @@ class VerticalTabRail extends StatelessWidget {
   final List<String> labels;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
+  final VoidCallback? onSettings;
 
   /// Ubuntu-style dock: full height, flush with the left edge.
   final bool dock;
@@ -28,7 +33,14 @@ class VerticalTabRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (dock) return _DockRail(labels: labels, selectedIndex: selectedIndex, onSelected: onSelected);
+    if (dock) {
+      return _DockRail(
+        labels: labels,
+        selectedIndex: selectedIndex,
+        onSelected: onSelected,
+        onSettings: onSettings,
+      );
+    }
 
     return Padding(
       padding: const EdgeInsets.only(left: 10, right: 4),
@@ -51,6 +63,21 @@ class VerticalTabRail extends StatelessWidget {
                 isSelected: index == selectedIndex,
                 onTap: () => onSelected(index),
               ),
+            if (onSettings != null) ...[
+              const Padding(
+                padding: EdgeInsets.only(top: 8),
+                child: _ThemeSlider(compact: true),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 8, bottom: 4),
+                child: NeuIconButton(
+                  icon: Icons.settings_rounded,
+                  size: 36,
+                  iconSize: 18,
+                  onPressed: onSettings,
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -63,11 +90,13 @@ class _DockRail extends StatelessWidget {
     required this.labels,
     required this.selectedIndex,
     required this.onSelected,
+    this.onSettings,
   });
 
   final List<String> labels;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
+  final VoidCallback? onSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +123,77 @@ class _DockRail extends StatelessWidget {
               ],
             ),
           ),
+          if (onSettings != null) ...[
+            const Padding(
+              padding: EdgeInsets.only(bottom: 10),
+              child: _ThemeSlider(),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 18),
+              child: NeuIconButton(
+                icon: Icons.settings_rounded,
+                iconSize: 20,
+                onPressed: onSettings,
+              ),
+            ),
+          ],
         ],
+      ),
+    );
+  }
+}
+
+/// Compact Light/Dark switch that sits just above the settings gear.
+class _ThemeSlider extends StatelessWidget {
+  const _ThemeSlider({this.compact = false});
+
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<SettingsController>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final width = compact ? 36.0 : 40.0;
+    final height = compact ? 20.0 : 22.0;
+    final thumb = height - 4;
+
+    return GestureDetector(
+      onTap: () => settings.toggleLightDark(
+        MediaQuery.platformBrightnessOf(context),
+      ),
+      child: NeuContainer(
+        sunken: true,
+        width: width,
+        height: height,
+        radius: height / 2,
+        depth: 3,
+        blur: 6,
+        padding: const EdgeInsets.all(2),
+        child: AnimatedAlign(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          alignment: isDark ? Alignment.centerRight : Alignment.centerLeft,
+          child: Container(
+            width: thumb,
+            height: thumb,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: context.palette.surfaceGradient,
+              boxShadow: [
+                BoxShadow(
+                  color: context.palette.shadowDark.withValues(alpha: 0.35),
+                  blurRadius: 3,
+                  offset: const Offset(1, 1),
+                ),
+              ],
+            ),
+            child: Icon(
+              isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+              size: compact ? 10 : 11,
+              color: context.palette.accent,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -150,7 +249,7 @@ class _RailTab extends StatelessWidget {
                 height: isSelected ? 38 : 0,
                 margin: const EdgeInsets.only(right: 8),
                 decoration: BoxDecoration(
-                  color: AppColors.accent,
+                    color: context.palette.accent,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -161,8 +260,8 @@ class _RailTab extends StatelessWidget {
                 style: DefaultTextStyle.of(context).style.merge(
                   AppTextStyles.railLabel.copyWith(
                     color: isSelected
-                        ? AppColors.textPrimary
-                        : AppColors.textSecondary,
+                        ? context.palette.textPrimary
+                        : context.palette.textSecondary,
                     fontSize: dock ? 13 : null,
                   ),
                 ),
@@ -176,7 +275,7 @@ class _RailTab extends StatelessWidget {
                 width: 2.5,
                 height: isSelected ? 34 : 0,
                 decoration: BoxDecoration(
-                  color: AppColors.accent,
+                    color: context.palette.accent,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),

@@ -11,6 +11,7 @@ import 'services/system_volume.dart';
 import 'services/library/folder_library_source.dart';
 import 'state/library_controller.dart';
 import 'state/player_controller.dart';
+import 'state/settings_controller.dart';
 import 'theme/app_colors.dart';
 
 Future<void> main() async {
@@ -20,12 +21,15 @@ Future<void> main() async {
 
   final database = AppDatabase();
   final librarySource = FolderLibrarySource();
+  final settings = SettingsController(database);
+  await settings.load();
 
   runApp(
     MultiProvider(
       providers: [
         Provider<AppDatabase>.value(value: database),
         Provider<ArtworkCache>(create: (_) => ArtworkCache(librarySource)),
+        ChangeNotifierProvider<SettingsController>.value(value: settings),
         ChangeNotifierProvider<PlayerController>(
           create: (_) => PlayerController(
             AudioPlayerService(),
