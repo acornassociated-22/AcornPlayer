@@ -73,6 +73,10 @@ jobs:
           cache: true
 
       - name: Build Windows release
+        # permission_handler_windows still includes <experimental/coroutine>, which the
+        # current MSVC toolchain rejects without this define.
+        env:
+          CL: /D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS
         run: flutter build windows --release
 
       - name: Package zip and setup .exe
@@ -155,16 +159,23 @@ jobs:
 
   publish:
     needs: [linux, android, windows, macos, ios]
-    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
 
       - name: Attach artifacts to the release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: artifacts/**/*
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            TAG="${{ github.ref_name }}"
+          else
+            TAG="v$(sed -n 's/^version: *\([0-9.]*\).*/\1/p' pubspec.yaml | head -1)"
+          fi
+          gh release view "$TAG" >/dev/null 2>&1 || \
+            gh release create "$TAG" --title "Acorn Player ${TAG#v}" --generate-notes
+          mapfile -t FILES < <(find artifacts -type f)
+          gh release upload "$TAG" "${FILES[@]}" --clobber
