@@ -22,7 +22,9 @@
   &nbsp;·&nbsp;
   <a href="#-download">Packages</a>
   &nbsp;·&nbsp;
-  <a href="#-screens">Screens</a>
+  <a href="#-mobile">Mobile</a>
+  &nbsp;·&nbsp;
+  <a href="#-screens">Desktop</a>
   &nbsp;·&nbsp;
   <a href="#-build-from-source">Build</a>
   &nbsp;·&nbsp;
@@ -30,7 +32,7 @@
 </p>
 
 <p align="center">
-  <img src="promo/promo-08-end-card.png" width="880" alt="Acorn Player — play it locally" />
+  <img src="promo/promo-01-cold-open.png" width="880" alt="Acorn Player — First the dark. Then the red. Nothing streams. Everything plays." />
 </p>
 
 ---
@@ -128,6 +130,40 @@
 
 ---
 
+## 📱 Mobile
+
+<p align="center">
+  <strong>Nothing streams. Everything plays.</strong><br/>
+  <sub>Favorites · Repeat · Shuffle · Speed · System volume</sub>
+</p>
+
+<p align="center">
+  <img src="promo/promo-feature-store.png" width="880" alt="Acorn Player — Favorites, Repeat, Shuffle, Speed, System volume" />
+</p>
+
+<table>
+  <tr>
+    <td width="50%" align="center" valign="top">
+      <b>Save what you love.</b><br/>
+      <sub>Favorites · library · now playing bar</sub><br/><br/>
+      <a href="promo/promo-library-story.png"><img src="promo/promo-library-story.png" width="100%" alt="Acorn Player favorites — Save what you love." /></a>
+    </td>
+    <td width="50%" align="center" valign="top">
+      <b>Swipe it. Tap the sides. Shuffle it.</b><br/>
+      <sub>Carousel · waveform · red play</sub><br/><br/>
+      <a href="promo/promo-now-playing-story.png"><img src="promo/promo-now-playing-story.png" width="100%" alt="Acorn Player now playing — Swipe it. Tap the sides. Shuffle it." /></a>
+    </td>
+  </tr>
+</table>
+
+<p align="center">
+  <a href="https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.0.0.apk"><img src="https://img.shields.io/badge/Get_it_on-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Get it on Android" /></a>
+  &nbsp;
+  <a href="https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.0.0_ios_unsigned.ipa"><img src="https://img.shields.io/badge/Sideload-iOS-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Sideload on iOS" /></a>
+</p>
+
+---
+
 ## 📸 Screens
 
 <table>
@@ -162,6 +198,10 @@
     </td>
   </tr>
 </table>
+
+<p align="center">
+  <img src="promo/promo-08-end-card.png" width="880" alt="Acorn Player — Play it locally. Local library · soft-UI player · no account, ever" />
+</p>
 
 ---
 
