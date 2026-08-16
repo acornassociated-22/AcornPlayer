@@ -32,8 +32,8 @@ const _androidRoots = [
   '/storage/emulated/0',
 ];
 
-/// Reads music straight from the file system on all five platforms. Tag parsing
-/// runs in an isolate so a large library never blocks the first frame.
+/// Reads music straight from the file system on all five platforms. Tag
+/// parsing and the directory walk both run in isolates.
 class FolderLibrarySource implements LibrarySource {
   @override
   Future<bool> requestAccess() async {
@@ -56,42 +56,52 @@ class FolderLibrarySource implements LibrarySource {
       FilePicker.getDirectoryPath(dialogTitle: 'Choose your music folder');
 
   @override
-  Future<List<Song>> loadSongs({String? folder}) async {
+  Future<List<Song>> loadSongs({
+    String? folder,
+    Map<String, Song> cached = const {},
+    void Function(int done, int total)? onProgress,
+    bool Function()? isCancelled,
+  }) async {
     if (folder == null) return const [];
     final directory = Directory(folder);
     if (!directory.existsSync()) return const [];
 
-    final paths = _audioFilesIn(directory);
-    return compute(_parseFiles, paths);
+    final paths = await compute(_walkFolder, folder);
+    if (isCancelled?.call() ?? false) return const [];
+    onProgress?.call(0, paths.length);
+
+    final reused = <Song>[];
+    final changed = <String>[];
+    for (final path in paths) {
+      if (isCancelled?.call() ?? false) return const [];
+      final previous = cached[path];
+      if (previous != null && _sameFile(previous, path)) {
+        reused.add(previous);
+      } else {
+        changed.add(path);
+      }
+    }
+
+    final parsed = changed.isEmpty
+        ? const <Song>[]
+        : await compute(_parseFiles, changed);
+    if (isCancelled?.call() ?? false) return const [];
+    onProgress?.call(paths.length, paths.length);
+    return [...reused, ...parsed];
   }
 
   @override
   Future<Uint8List?> artwork(Song song) => compute(_readArtwork, song.source);
+}
 
-  /// Walks [directory], skipping folders we cannot read instead of failing.
-  List<String> _audioFilesIn(Directory directory) {
-    final paths = <String>[];
-    final pending = <Directory>[directory];
-
-    while (pending.isNotEmpty) {
-      final current = pending.removeLast();
-      final List<FileSystemEntity> entries;
-      try {
-        entries = current.listSync(followLinks: false);
-      } on FileSystemException {
-        continue;
-      }
-
-      for (final entry in entries) {
-        if (entry is Directory) {
-          if (!p.basename(entry.path).startsWith('.')) pending.add(entry);
-        } else if (entry is File &&
-            _audioExtensions.contains(p.extension(entry.path).toLowerCase())) {
-          paths.add(entry.path);
-        }
-      }
-    }
-    return paths;
+/// True when [song] still matches the file on disk.
+bool _sameFile(Song song, String path) {
+  try {
+    final stat = File(path).statSync();
+    return song.fileModified == stat.modified.millisecondsSinceEpoch &&
+        song.fileSize == stat.size;
+  } catch (_) {
+    return false;
   }
 }
 
@@ -102,15 +112,47 @@ List<String> _homeRoots() {
   return home == null ? const [] : [p.join(home, 'Music')];
 }
 
+/// Walks [folder] on a background isolate.
+List<String> _walkFolder(String folder) {
+  final paths = <String>[];
+  final pending = <Directory>[Directory(folder)];
+
+  while (pending.isNotEmpty) {
+    final current = pending.removeLast();
+    final List<FileSystemEntity> entries;
+    try {
+      entries = current.listSync(followLinks: false);
+    } on FileSystemException {
+      continue;
+    }
+
+    for (final entry in entries) {
+      if (entry is Directory) {
+        if (!p.basename(entry.path).startsWith('.')) pending.add(entry);
+      } else if (entry is File &&
+          _audioExtensions.contains(p.extension(entry.path).toLowerCase())) {
+        paths.add(entry.path);
+      }
+    }
+  }
+  return paths;
+}
+
 /// Runs in a background isolate: turns file paths into songs.
 List<Song> _parseFiles(List<String> paths) {
-  final songs = [for (final path in paths) _parseFile(path)];
-  songs.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
-  return songs;
+  return [for (final path in paths) _parseFile(path)];
 }
 
 Song _parseFile(String path) {
   final fallback = _fromFileName(p.basenameWithoutExtension(path));
+  int? modified;
+  int? size;
+  try {
+    final stat = File(path).statSync();
+    modified = stat.modified.millisecondsSinceEpoch;
+    size = stat.size;
+  } catch (_) {}
+
   try {
     final metadata = readMetadata(File(path));
     return Song(
@@ -120,6 +162,14 @@ Song _parseFile(String path) {
       album: _cleanTag(metadata.album),
       duration: metadata.duration ?? Duration.zero,
       source: path,
+      genre: metadata.genres.isEmpty ? null : _cleanTag(metadata.genres.first),
+      year: metadata.year?.year,
+      trackNumber: metadata.trackNumber,
+      discNumber: metadata.discNumber,
+      albumArtist: _cleanTag(metadata.artist),
+      addedAt: DateTime.now(),
+      fileModified: modified,
+      fileSize: size,
     );
   } catch (_) {
     // Unsupported or damaged tags still leave a playable file.
@@ -128,6 +178,9 @@ Song _parseFile(String path) {
       title: fallback.title,
       artist: fallback.artist,
       source: path,
+      addedAt: DateTime.now(),
+      fileModified: modified,
+      fileSize: size,
     );
   }
 }

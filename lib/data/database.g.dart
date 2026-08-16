@@ -92,6 +92,113 @@ class $CachedSongsTable extends CachedSongs
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _genreMeta = const VerificationMeta('genre');
+  @override
+  late final GeneratedColumn<String> genre = GeneratedColumn<String>(
+    'genre',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _yearMeta = const VerificationMeta('year');
+  @override
+  late final GeneratedColumn<int> year = GeneratedColumn<int>(
+    'year',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _trackNumberMeta = const VerificationMeta(
+    'trackNumber',
+  );
+  @override
+  late final GeneratedColumn<int> trackNumber = GeneratedColumn<int>(
+    'track_number',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _discNumberMeta = const VerificationMeta(
+    'discNumber',
+  );
+  @override
+  late final GeneratedColumn<int> discNumber = GeneratedColumn<int>(
+    'disc_number',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _albumArtistMeta = const VerificationMeta(
+    'albumArtist',
+  );
+  @override
+  late final GeneratedColumn<String> albumArtist = GeneratedColumn<String>(
+    'album_artist',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _addedAtMeta = const VerificationMeta(
+    'addedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> addedAt = GeneratedColumn<DateTime>(
+    'added_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _playCountMeta = const VerificationMeta(
+    'playCount',
+  );
+  @override
+  late final GeneratedColumn<int> playCount = GeneratedColumn<int>(
+    'play_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _lastPlayedAtMeta = const VerificationMeta(
+    'lastPlayedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastPlayedAt = GeneratedColumn<DateTime>(
+    'last_played_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fileModifiedMeta = const VerificationMeta(
+    'fileModified',
+  );
+  @override
+  late final GeneratedColumn<int> fileModified = GeneratedColumn<int>(
+    'file_modified',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fileSizeMeta = const VerificationMeta(
+    'fileSize',
+  );
+  @override
+  late final GeneratedColumn<int> fileSize = GeneratedColumn<int>(
+    'file_size',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -102,6 +209,16 @@ class $CachedSongsTable extends CachedSongs
     source,
     mediaStoreId,
     isLiked,
+    genre,
+    year,
+    trackNumber,
+    discNumber,
+    albumArtist,
+    addedAt,
+    playCount,
+    lastPlayedAt,
+    fileModified,
+    fileSize,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -171,6 +288,78 @@ class $CachedSongsTable extends CachedSongs
         isLiked.isAcceptableOrUnknown(data['is_liked']!, _isLikedMeta),
       );
     }
+    if (data.containsKey('genre')) {
+      context.handle(
+        _genreMeta,
+        genre.isAcceptableOrUnknown(data['genre']!, _genreMeta),
+      );
+    }
+    if (data.containsKey('year')) {
+      context.handle(
+        _yearMeta,
+        year.isAcceptableOrUnknown(data['year']!, _yearMeta),
+      );
+    }
+    if (data.containsKey('track_number')) {
+      context.handle(
+        _trackNumberMeta,
+        trackNumber.isAcceptableOrUnknown(
+          data['track_number']!,
+          _trackNumberMeta,
+        ),
+      );
+    }
+    if (data.containsKey('disc_number')) {
+      context.handle(
+        _discNumberMeta,
+        discNumber.isAcceptableOrUnknown(data['disc_number']!, _discNumberMeta),
+      );
+    }
+    if (data.containsKey('album_artist')) {
+      context.handle(
+        _albumArtistMeta,
+        albumArtist.isAcceptableOrUnknown(
+          data['album_artist']!,
+          _albumArtistMeta,
+        ),
+      );
+    }
+    if (data.containsKey('added_at')) {
+      context.handle(
+        _addedAtMeta,
+        addedAt.isAcceptableOrUnknown(data['added_at']!, _addedAtMeta),
+      );
+    }
+    if (data.containsKey('play_count')) {
+      context.handle(
+        _playCountMeta,
+        playCount.isAcceptableOrUnknown(data['play_count']!, _playCountMeta),
+      );
+    }
+    if (data.containsKey('last_played_at')) {
+      context.handle(
+        _lastPlayedAtMeta,
+        lastPlayedAt.isAcceptableOrUnknown(
+          data['last_played_at']!,
+          _lastPlayedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('file_modified')) {
+      context.handle(
+        _fileModifiedMeta,
+        fileModified.isAcceptableOrUnknown(
+          data['file_modified']!,
+          _fileModifiedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('file_size')) {
+      context.handle(
+        _fileSizeMeta,
+        fileSize.isAcceptableOrUnknown(data['file_size']!, _fileSizeMeta),
+      );
+    }
     return context;
   }
 
@@ -212,6 +401,46 @@ class $CachedSongsTable extends CachedSongs
         DriftSqlType.bool,
         data['${effectivePrefix}is_liked'],
       )!,
+      genre: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}genre'],
+      ),
+      year: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}year'],
+      ),
+      trackNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}track_number'],
+      ),
+      discNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}disc_number'],
+      ),
+      albumArtist: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}album_artist'],
+      ),
+      addedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}added_at'],
+      ),
+      playCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}play_count'],
+      )!,
+      lastPlayedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_played_at'],
+      ),
+      fileModified: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}file_modified'],
+      ),
+      fileSize: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}file_size'],
+      ),
     );
   }
 
@@ -230,6 +459,16 @@ class CachedSong extends DataClass implements Insertable<CachedSong> {
   final String source;
   final int? mediaStoreId;
   final bool isLiked;
+  final String? genre;
+  final int? year;
+  final int? trackNumber;
+  final int? discNumber;
+  final String? albumArtist;
+  final DateTime? addedAt;
+  final int playCount;
+  final DateTime? lastPlayedAt;
+  final int? fileModified;
+  final int? fileSize;
   const CachedSong({
     required this.id,
     required this.title,
@@ -239,6 +478,16 @@ class CachedSong extends DataClass implements Insertable<CachedSong> {
     required this.source,
     this.mediaStoreId,
     required this.isLiked,
+    this.genre,
+    this.year,
+    this.trackNumber,
+    this.discNumber,
+    this.albumArtist,
+    this.addedAt,
+    required this.playCount,
+    this.lastPlayedAt,
+    this.fileModified,
+    this.fileSize,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -255,6 +504,34 @@ class CachedSong extends DataClass implements Insertable<CachedSong> {
       map['media_store_id'] = Variable<int>(mediaStoreId);
     }
     map['is_liked'] = Variable<bool>(isLiked);
+    if (!nullToAbsent || genre != null) {
+      map['genre'] = Variable<String>(genre);
+    }
+    if (!nullToAbsent || year != null) {
+      map['year'] = Variable<int>(year);
+    }
+    if (!nullToAbsent || trackNumber != null) {
+      map['track_number'] = Variable<int>(trackNumber);
+    }
+    if (!nullToAbsent || discNumber != null) {
+      map['disc_number'] = Variable<int>(discNumber);
+    }
+    if (!nullToAbsent || albumArtist != null) {
+      map['album_artist'] = Variable<String>(albumArtist);
+    }
+    if (!nullToAbsent || addedAt != null) {
+      map['added_at'] = Variable<DateTime>(addedAt);
+    }
+    map['play_count'] = Variable<int>(playCount);
+    if (!nullToAbsent || lastPlayedAt != null) {
+      map['last_played_at'] = Variable<DateTime>(lastPlayedAt);
+    }
+    if (!nullToAbsent || fileModified != null) {
+      map['file_modified'] = Variable<int>(fileModified);
+    }
+    if (!nullToAbsent || fileSize != null) {
+      map['file_size'] = Variable<int>(fileSize);
+    }
     return map;
   }
 
@@ -272,6 +549,32 @@ class CachedSong extends DataClass implements Insertable<CachedSong> {
           ? const Value.absent()
           : Value(mediaStoreId),
       isLiked: Value(isLiked),
+      genre: genre == null && nullToAbsent
+          ? const Value.absent()
+          : Value(genre),
+      year: year == null && nullToAbsent ? const Value.absent() : Value(year),
+      trackNumber: trackNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(trackNumber),
+      discNumber: discNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(discNumber),
+      albumArtist: albumArtist == null && nullToAbsent
+          ? const Value.absent()
+          : Value(albumArtist),
+      addedAt: addedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(addedAt),
+      playCount: Value(playCount),
+      lastPlayedAt: lastPlayedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastPlayedAt),
+      fileModified: fileModified == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fileModified),
+      fileSize: fileSize == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fileSize),
     );
   }
 
@@ -289,6 +592,16 @@ class CachedSong extends DataClass implements Insertable<CachedSong> {
       source: serializer.fromJson<String>(json['source']),
       mediaStoreId: serializer.fromJson<int?>(json['mediaStoreId']),
       isLiked: serializer.fromJson<bool>(json['isLiked']),
+      genre: serializer.fromJson<String?>(json['genre']),
+      year: serializer.fromJson<int?>(json['year']),
+      trackNumber: serializer.fromJson<int?>(json['trackNumber']),
+      discNumber: serializer.fromJson<int?>(json['discNumber']),
+      albumArtist: serializer.fromJson<String?>(json['albumArtist']),
+      addedAt: serializer.fromJson<DateTime?>(json['addedAt']),
+      playCount: serializer.fromJson<int>(json['playCount']),
+      lastPlayedAt: serializer.fromJson<DateTime?>(json['lastPlayedAt']),
+      fileModified: serializer.fromJson<int?>(json['fileModified']),
+      fileSize: serializer.fromJson<int?>(json['fileSize']),
     );
   }
   @override
@@ -303,6 +616,16 @@ class CachedSong extends DataClass implements Insertable<CachedSong> {
       'source': serializer.toJson<String>(source),
       'mediaStoreId': serializer.toJson<int?>(mediaStoreId),
       'isLiked': serializer.toJson<bool>(isLiked),
+      'genre': serializer.toJson<String?>(genre),
+      'year': serializer.toJson<int?>(year),
+      'trackNumber': serializer.toJson<int?>(trackNumber),
+      'discNumber': serializer.toJson<int?>(discNumber),
+      'albumArtist': serializer.toJson<String?>(albumArtist),
+      'addedAt': serializer.toJson<DateTime?>(addedAt),
+      'playCount': serializer.toJson<int>(playCount),
+      'lastPlayedAt': serializer.toJson<DateTime?>(lastPlayedAt),
+      'fileModified': serializer.toJson<int?>(fileModified),
+      'fileSize': serializer.toJson<int?>(fileSize),
     };
   }
 
@@ -315,6 +638,16 @@ class CachedSong extends DataClass implements Insertable<CachedSong> {
     String? source,
     Value<int?> mediaStoreId = const Value.absent(),
     bool? isLiked,
+    Value<String?> genre = const Value.absent(),
+    Value<int?> year = const Value.absent(),
+    Value<int?> trackNumber = const Value.absent(),
+    Value<int?> discNumber = const Value.absent(),
+    Value<String?> albumArtist = const Value.absent(),
+    Value<DateTime?> addedAt = const Value.absent(),
+    int? playCount,
+    Value<DateTime?> lastPlayedAt = const Value.absent(),
+    Value<int?> fileModified = const Value.absent(),
+    Value<int?> fileSize = const Value.absent(),
   }) => CachedSong(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -324,6 +657,16 @@ class CachedSong extends DataClass implements Insertable<CachedSong> {
     source: source ?? this.source,
     mediaStoreId: mediaStoreId.present ? mediaStoreId.value : this.mediaStoreId,
     isLiked: isLiked ?? this.isLiked,
+    genre: genre.present ? genre.value : this.genre,
+    year: year.present ? year.value : this.year,
+    trackNumber: trackNumber.present ? trackNumber.value : this.trackNumber,
+    discNumber: discNumber.present ? discNumber.value : this.discNumber,
+    albumArtist: albumArtist.present ? albumArtist.value : this.albumArtist,
+    addedAt: addedAt.present ? addedAt.value : this.addedAt,
+    playCount: playCount ?? this.playCount,
+    lastPlayedAt: lastPlayedAt.present ? lastPlayedAt.value : this.lastPlayedAt,
+    fileModified: fileModified.present ? fileModified.value : this.fileModified,
+    fileSize: fileSize.present ? fileSize.value : this.fileSize,
   );
   CachedSong copyWithCompanion(CachedSongsCompanion data) {
     return CachedSong(
@@ -339,6 +682,26 @@ class CachedSong extends DataClass implements Insertable<CachedSong> {
           ? data.mediaStoreId.value
           : this.mediaStoreId,
       isLiked: data.isLiked.present ? data.isLiked.value : this.isLiked,
+      genre: data.genre.present ? data.genre.value : this.genre,
+      year: data.year.present ? data.year.value : this.year,
+      trackNumber: data.trackNumber.present
+          ? data.trackNumber.value
+          : this.trackNumber,
+      discNumber: data.discNumber.present
+          ? data.discNumber.value
+          : this.discNumber,
+      albumArtist: data.albumArtist.present
+          ? data.albumArtist.value
+          : this.albumArtist,
+      addedAt: data.addedAt.present ? data.addedAt.value : this.addedAt,
+      playCount: data.playCount.present ? data.playCount.value : this.playCount,
+      lastPlayedAt: data.lastPlayedAt.present
+          ? data.lastPlayedAt.value
+          : this.lastPlayedAt,
+      fileModified: data.fileModified.present
+          ? data.fileModified.value
+          : this.fileModified,
+      fileSize: data.fileSize.present ? data.fileSize.value : this.fileSize,
     );
   }
 
@@ -352,7 +715,17 @@ class CachedSong extends DataClass implements Insertable<CachedSong> {
           ..write('durationMs: $durationMs, ')
           ..write('source: $source, ')
           ..write('mediaStoreId: $mediaStoreId, ')
-          ..write('isLiked: $isLiked')
+          ..write('isLiked: $isLiked, ')
+          ..write('genre: $genre, ')
+          ..write('year: $year, ')
+          ..write('trackNumber: $trackNumber, ')
+          ..write('discNumber: $discNumber, ')
+          ..write('albumArtist: $albumArtist, ')
+          ..write('addedAt: $addedAt, ')
+          ..write('playCount: $playCount, ')
+          ..write('lastPlayedAt: $lastPlayedAt, ')
+          ..write('fileModified: $fileModified, ')
+          ..write('fileSize: $fileSize')
           ..write(')'))
         .toString();
   }
@@ -367,6 +740,16 @@ class CachedSong extends DataClass implements Insertable<CachedSong> {
     source,
     mediaStoreId,
     isLiked,
+    genre,
+    year,
+    trackNumber,
+    discNumber,
+    albumArtist,
+    addedAt,
+    playCount,
+    lastPlayedAt,
+    fileModified,
+    fileSize,
   );
   @override
   bool operator ==(Object other) =>
@@ -379,7 +762,17 @@ class CachedSong extends DataClass implements Insertable<CachedSong> {
           other.durationMs == this.durationMs &&
           other.source == this.source &&
           other.mediaStoreId == this.mediaStoreId &&
-          other.isLiked == this.isLiked);
+          other.isLiked == this.isLiked &&
+          other.genre == this.genre &&
+          other.year == this.year &&
+          other.trackNumber == this.trackNumber &&
+          other.discNumber == this.discNumber &&
+          other.albumArtist == this.albumArtist &&
+          other.addedAt == this.addedAt &&
+          other.playCount == this.playCount &&
+          other.lastPlayedAt == this.lastPlayedAt &&
+          other.fileModified == this.fileModified &&
+          other.fileSize == this.fileSize);
 }
 
 class CachedSongsCompanion extends UpdateCompanion<CachedSong> {
@@ -391,6 +784,16 @@ class CachedSongsCompanion extends UpdateCompanion<CachedSong> {
   final Value<String> source;
   final Value<int?> mediaStoreId;
   final Value<bool> isLiked;
+  final Value<String?> genre;
+  final Value<int?> year;
+  final Value<int?> trackNumber;
+  final Value<int?> discNumber;
+  final Value<String?> albumArtist;
+  final Value<DateTime?> addedAt;
+  final Value<int> playCount;
+  final Value<DateTime?> lastPlayedAt;
+  final Value<int?> fileModified;
+  final Value<int?> fileSize;
   final Value<int> rowid;
   const CachedSongsCompanion({
     this.id = const Value.absent(),
@@ -401,6 +804,16 @@ class CachedSongsCompanion extends UpdateCompanion<CachedSong> {
     this.source = const Value.absent(),
     this.mediaStoreId = const Value.absent(),
     this.isLiked = const Value.absent(),
+    this.genre = const Value.absent(),
+    this.year = const Value.absent(),
+    this.trackNumber = const Value.absent(),
+    this.discNumber = const Value.absent(),
+    this.albumArtist = const Value.absent(),
+    this.addedAt = const Value.absent(),
+    this.playCount = const Value.absent(),
+    this.lastPlayedAt = const Value.absent(),
+    this.fileModified = const Value.absent(),
+    this.fileSize = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CachedSongsCompanion.insert({
@@ -412,6 +825,16 @@ class CachedSongsCompanion extends UpdateCompanion<CachedSong> {
     required String source,
     this.mediaStoreId = const Value.absent(),
     this.isLiked = const Value.absent(),
+    this.genre = const Value.absent(),
+    this.year = const Value.absent(),
+    this.trackNumber = const Value.absent(),
+    this.discNumber = const Value.absent(),
+    this.albumArtist = const Value.absent(),
+    this.addedAt = const Value.absent(),
+    this.playCount = const Value.absent(),
+    this.lastPlayedAt = const Value.absent(),
+    this.fileModified = const Value.absent(),
+    this.fileSize = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        title = Value(title),
@@ -426,6 +849,16 @@ class CachedSongsCompanion extends UpdateCompanion<CachedSong> {
     Expression<String>? source,
     Expression<int>? mediaStoreId,
     Expression<bool>? isLiked,
+    Expression<String>? genre,
+    Expression<int>? year,
+    Expression<int>? trackNumber,
+    Expression<int>? discNumber,
+    Expression<String>? albumArtist,
+    Expression<DateTime>? addedAt,
+    Expression<int>? playCount,
+    Expression<DateTime>? lastPlayedAt,
+    Expression<int>? fileModified,
+    Expression<int>? fileSize,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -437,6 +870,16 @@ class CachedSongsCompanion extends UpdateCompanion<CachedSong> {
       if (source != null) 'source': source,
       if (mediaStoreId != null) 'media_store_id': mediaStoreId,
       if (isLiked != null) 'is_liked': isLiked,
+      if (genre != null) 'genre': genre,
+      if (year != null) 'year': year,
+      if (trackNumber != null) 'track_number': trackNumber,
+      if (discNumber != null) 'disc_number': discNumber,
+      if (albumArtist != null) 'album_artist': albumArtist,
+      if (addedAt != null) 'added_at': addedAt,
+      if (playCount != null) 'play_count': playCount,
+      if (lastPlayedAt != null) 'last_played_at': lastPlayedAt,
+      if (fileModified != null) 'file_modified': fileModified,
+      if (fileSize != null) 'file_size': fileSize,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -450,6 +893,16 @@ class CachedSongsCompanion extends UpdateCompanion<CachedSong> {
     Value<String>? source,
     Value<int?>? mediaStoreId,
     Value<bool>? isLiked,
+    Value<String?>? genre,
+    Value<int?>? year,
+    Value<int?>? trackNumber,
+    Value<int?>? discNumber,
+    Value<String?>? albumArtist,
+    Value<DateTime?>? addedAt,
+    Value<int>? playCount,
+    Value<DateTime?>? lastPlayedAt,
+    Value<int?>? fileModified,
+    Value<int?>? fileSize,
     Value<int>? rowid,
   }) {
     return CachedSongsCompanion(
@@ -461,6 +914,16 @@ class CachedSongsCompanion extends UpdateCompanion<CachedSong> {
       source: source ?? this.source,
       mediaStoreId: mediaStoreId ?? this.mediaStoreId,
       isLiked: isLiked ?? this.isLiked,
+      genre: genre ?? this.genre,
+      year: year ?? this.year,
+      trackNumber: trackNumber ?? this.trackNumber,
+      discNumber: discNumber ?? this.discNumber,
+      albumArtist: albumArtist ?? this.albumArtist,
+      addedAt: addedAt ?? this.addedAt,
+      playCount: playCount ?? this.playCount,
+      lastPlayedAt: lastPlayedAt ?? this.lastPlayedAt,
+      fileModified: fileModified ?? this.fileModified,
+      fileSize: fileSize ?? this.fileSize,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -492,6 +955,36 @@ class CachedSongsCompanion extends UpdateCompanion<CachedSong> {
     if (isLiked.present) {
       map['is_liked'] = Variable<bool>(isLiked.value);
     }
+    if (genre.present) {
+      map['genre'] = Variable<String>(genre.value);
+    }
+    if (year.present) {
+      map['year'] = Variable<int>(year.value);
+    }
+    if (trackNumber.present) {
+      map['track_number'] = Variable<int>(trackNumber.value);
+    }
+    if (discNumber.present) {
+      map['disc_number'] = Variable<int>(discNumber.value);
+    }
+    if (albumArtist.present) {
+      map['album_artist'] = Variable<String>(albumArtist.value);
+    }
+    if (addedAt.present) {
+      map['added_at'] = Variable<DateTime>(addedAt.value);
+    }
+    if (playCount.present) {
+      map['play_count'] = Variable<int>(playCount.value);
+    }
+    if (lastPlayedAt.present) {
+      map['last_played_at'] = Variable<DateTime>(lastPlayedAt.value);
+    }
+    if (fileModified.present) {
+      map['file_modified'] = Variable<int>(fileModified.value);
+    }
+    if (fileSize.present) {
+      map['file_size'] = Variable<int>(fileSize.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -509,6 +1002,16 @@ class CachedSongsCompanion extends UpdateCompanion<CachedSong> {
           ..write('source: $source, ')
           ..write('mediaStoreId: $mediaStoreId, ')
           ..write('isLiked: $isLiked, ')
+          ..write('genre: $genre, ')
+          ..write('year: $year, ')
+          ..write('trackNumber: $trackNumber, ')
+          ..write('discNumber: $discNumber, ')
+          ..write('albumArtist: $albumArtist, ')
+          ..write('addedAt: $addedAt, ')
+          ..write('playCount: $playCount, ')
+          ..write('lastPlayedAt: $lastPlayedAt, ')
+          ..write('fileModified: $fileModified, ')
+          ..write('fileSize: $fileSize, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1277,6 +1780,16 @@ typedef $$CachedSongsTableCreateCompanionBuilder =
       required String source,
       Value<int?> mediaStoreId,
       Value<bool> isLiked,
+      Value<String?> genre,
+      Value<int?> year,
+      Value<int?> trackNumber,
+      Value<int?> discNumber,
+      Value<String?> albumArtist,
+      Value<DateTime?> addedAt,
+      Value<int> playCount,
+      Value<DateTime?> lastPlayedAt,
+      Value<int?> fileModified,
+      Value<int?> fileSize,
       Value<int> rowid,
     });
 typedef $$CachedSongsTableUpdateCompanionBuilder =
@@ -1289,6 +1802,16 @@ typedef $$CachedSongsTableUpdateCompanionBuilder =
       Value<String> source,
       Value<int?> mediaStoreId,
       Value<bool> isLiked,
+      Value<String?> genre,
+      Value<int?> year,
+      Value<int?> trackNumber,
+      Value<int?> discNumber,
+      Value<String?> albumArtist,
+      Value<DateTime?> addedAt,
+      Value<int> playCount,
+      Value<DateTime?> lastPlayedAt,
+      Value<int?> fileModified,
+      Value<int?> fileSize,
       Value<int> rowid,
     });
 
@@ -1338,6 +1861,56 @@ class $$CachedSongsTableFilterComposer
 
   ColumnFilters<bool> get isLiked => $composableBuilder(
     column: $table.isLiked,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get genre => $composableBuilder(
+    column: $table.genre,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get year => $composableBuilder(
+    column: $table.year,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get trackNumber => $composableBuilder(
+    column: $table.trackNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get discNumber => $composableBuilder(
+    column: $table.discNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get albumArtist => $composableBuilder(
+    column: $table.albumArtist,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get addedAt => $composableBuilder(
+    column: $table.addedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get playCount => $composableBuilder(
+    column: $table.playCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastPlayedAt => $composableBuilder(
+    column: $table.lastPlayedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get fileModified => $composableBuilder(
+    column: $table.fileModified,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get fileSize => $composableBuilder(
+    column: $table.fileSize,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1390,6 +1963,56 @@ class $$CachedSongsTableOrderingComposer
     column: $table.isLiked,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get genre => $composableBuilder(
+    column: $table.genre,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get year => $composableBuilder(
+    column: $table.year,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get trackNumber => $composableBuilder(
+    column: $table.trackNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get discNumber => $composableBuilder(
+    column: $table.discNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get albumArtist => $composableBuilder(
+    column: $table.albumArtist,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get addedAt => $composableBuilder(
+    column: $table.addedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get playCount => $composableBuilder(
+    column: $table.playCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastPlayedAt => $composableBuilder(
+    column: $table.lastPlayedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get fileModified => $composableBuilder(
+    column: $table.fileModified,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get fileSize => $composableBuilder(
+    column: $table.fileSize,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CachedSongsTableAnnotationComposer
@@ -1428,6 +2051,46 @@ class $$CachedSongsTableAnnotationComposer
 
   GeneratedColumn<bool> get isLiked =>
       $composableBuilder(column: $table.isLiked, builder: (column) => column);
+
+  GeneratedColumn<String> get genre =>
+      $composableBuilder(column: $table.genre, builder: (column) => column);
+
+  GeneratedColumn<int> get year =>
+      $composableBuilder(column: $table.year, builder: (column) => column);
+
+  GeneratedColumn<int> get trackNumber => $composableBuilder(
+    column: $table.trackNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get discNumber => $composableBuilder(
+    column: $table.discNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get albumArtist => $composableBuilder(
+    column: $table.albumArtist,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get addedAt =>
+      $composableBuilder(column: $table.addedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get playCount =>
+      $composableBuilder(column: $table.playCount, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastPlayedAt => $composableBuilder(
+    column: $table.lastPlayedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get fileModified => $composableBuilder(
+    column: $table.fileModified,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get fileSize =>
+      $composableBuilder(column: $table.fileSize, builder: (column) => column);
 }
 
 class $$CachedSongsTableTableManager
@@ -1469,6 +2132,16 @@ class $$CachedSongsTableTableManager
                 Value<String> source = const Value.absent(),
                 Value<int?> mediaStoreId = const Value.absent(),
                 Value<bool> isLiked = const Value.absent(),
+                Value<String?> genre = const Value.absent(),
+                Value<int?> year = const Value.absent(),
+                Value<int?> trackNumber = const Value.absent(),
+                Value<int?> discNumber = const Value.absent(),
+                Value<String?> albumArtist = const Value.absent(),
+                Value<DateTime?> addedAt = const Value.absent(),
+                Value<int> playCount = const Value.absent(),
+                Value<DateTime?> lastPlayedAt = const Value.absent(),
+                Value<int?> fileModified = const Value.absent(),
+                Value<int?> fileSize = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CachedSongsCompanion(
                 id: id,
@@ -1479,6 +2152,16 @@ class $$CachedSongsTableTableManager
                 source: source,
                 mediaStoreId: mediaStoreId,
                 isLiked: isLiked,
+                genre: genre,
+                year: year,
+                trackNumber: trackNumber,
+                discNumber: discNumber,
+                albumArtist: albumArtist,
+                addedAt: addedAt,
+                playCount: playCount,
+                lastPlayedAt: lastPlayedAt,
+                fileModified: fileModified,
+                fileSize: fileSize,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1491,6 +2174,16 @@ class $$CachedSongsTableTableManager
                 required String source,
                 Value<int?> mediaStoreId = const Value.absent(),
                 Value<bool> isLiked = const Value.absent(),
+                Value<String?> genre = const Value.absent(),
+                Value<int?> year = const Value.absent(),
+                Value<int?> trackNumber = const Value.absent(),
+                Value<int?> discNumber = const Value.absent(),
+                Value<String?> albumArtist = const Value.absent(),
+                Value<DateTime?> addedAt = const Value.absent(),
+                Value<int> playCount = const Value.absent(),
+                Value<DateTime?> lastPlayedAt = const Value.absent(),
+                Value<int?> fileModified = const Value.absent(),
+                Value<int?> fileSize = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CachedSongsCompanion.insert(
                 id: id,
@@ -1501,6 +2194,16 @@ class $$CachedSongsTableTableManager
                 source: source,
                 mediaStoreId: mediaStoreId,
                 isLiked: isLiked,
+                genre: genre,
+                year: year,
+                trackNumber: trackNumber,
+                discNumber: discNumber,
+                albumArtist: albumArtist,
+                addedAt: addedAt,
+                playCount: playCount,
+                lastPlayedAt: lastPlayedAt,
+                fileModified: fileModified,
+                fileSize: fileSize,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

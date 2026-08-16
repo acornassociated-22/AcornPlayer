@@ -20,7 +20,13 @@ class _EmptyLibrarySource implements LibrarySource {
   Future<String?> pickFolder() async => null;
 
   @override
-  Future<List<Song>> loadSongs({String? folder}) async => const [];
+  Future<List<Song>> loadSongs({
+    String? folder,
+    Map<String, Song> cached = const {},
+    void Function(int done, int total)? onProgress,
+    bool Function()? isCancelled,
+  }) async =>
+      const [];
 
   @override
   Future<Uint8List?> artwork(Song song) async => null;

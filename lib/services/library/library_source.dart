@@ -15,8 +15,13 @@ abstract interface class LibrarySource {
   /// Opens a folder picker, or null when the user cancels.
   Future<String?> pickFolder();
 
-  /// Every playable track inside [folder].
-  Future<List<Song>> loadSongs({String? folder});
+  /// Every playable track inside [folder]. Unchanged [cached] rows are reused.
+  Future<List<Song>> loadSongs({
+    String? folder,
+    Map<String, Song> cached = const {},
+    void Function(int done, int total)? onProgress,
+    bool Function()? isCancelled,
+  });
 
   /// Cover art bytes, or null when the track carries none.
   Future<Uint8List?> artwork(Song song);
