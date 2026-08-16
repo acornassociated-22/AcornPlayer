@@ -12,6 +12,7 @@ import '../widgets/app_top_bar.dart';
 import '../widgets/mini_player.dart';
 import '../widgets/neu_container.dart';
 import '../widgets/neu_icon_button.dart';
+import '../widgets/add_songs_panel.dart';
 import '../widgets/queue_panel.dart';
 import '../widgets/settings_panel.dart';
 import '../widgets/song_grid_card.dart';
@@ -22,6 +23,14 @@ import 'now_playing_screen.dart';
 const _contentMaxWidth = 1000.0;
 const _wideBreakpoint = 600.0;
 
+/// Labels for the side rail, matching [LibraryTab] order.
+List<String> _tabLabels(BuildContext context) => [
+  context.t('artists'),
+  context.t('playlists'),
+  context.t('songs'),
+  context.t('favorites'),
+];
+
 /// Browsing screen: sideways tabs, the track list and the mini player.
 class LibraryScreen extends StatelessWidget {
   const LibraryScreen({super.key});
@@ -31,14 +40,7 @@ class LibraryScreen extends StatelessWidget {
     final library = context.watch<LibraryController>();
     final player = context.watch<PlayerController>();
     final wide = MediaQuery.sizeOf(context).width >= _wideBreakpoint;
-    final labels = [
-      context.t('albums'),
-      context.t('artists'),
-      context.t('genres'),
-      context.t('playlists'),
-      context.t('songs'),
-      context.t('favorites'),
-    ];
+    final labels = _tabLabels(context);
 
     final main = _LibraryMain(
       library: library,
@@ -109,6 +111,13 @@ Future<void> _createPlaylist(
   await library.createPlaylist(name);
 }
 
+/// Opens the side panel that adds library tracks to the opened playlist.
+void _openAddSongs(BuildContext context, LibraryController library) {
+  final playlistId = library.selectedPlaylistId;
+  if (playlistId == null) return;
+  AddSongsPanel.open(context, playlistId);
+}
+
 /// Picks how the current song list is ordered.
 void _showSortMenu(BuildContext context, LibraryController library) {
   showActionSheet(
@@ -156,6 +165,13 @@ class _LibraryMain extends StatelessWidget {
           icon: Icons.add_rounded,
           iconSize: 18,
           onPressed: () => _createPlaylist(context, library),
+        ),
+      if (library.tab == LibraryTab.playlists &&
+          library.selectedPlaylistId != null)
+        NeuIconButton(
+          icon: Icons.playlist_add_rounded,
+          iconSize: 18,
+          onPressed: () => _openAddSongs(context, library),
         ),
       if (library.view == LibraryView.songs) ...[
         NeuIconButton(
@@ -239,14 +255,7 @@ class _LibraryMain extends StatelessWidget {
                       child: Row(
                         children: [
                           VerticalTabRail(
-                            labels: [
-                              context.t('albums'),
-                              context.t('artists'),
-                              context.t('genres'),
-                              context.t('playlists'),
-                              context.t('songs'),
-                              context.t('favorites'),
-                            ],
+                            labels: _tabLabels(context),
                             selectedIndex: library.tab.index,
                             onSelected: (index) =>
                                 library.selectTab(LibraryTab.values[index]),
@@ -507,10 +516,8 @@ class _Body extends StatelessWidget {
       case LibraryStatus.ready:
         return switch (library.view) {
           LibraryView.songs => _SongList(library: library, player: player),
-          LibraryView.albums => _AlbumList(library: library),
           LibraryView.playlists => _PlaylistList(library: library),
           LibraryView.artists => _ArtistList(library: library),
-          LibraryView.genres => _GenreList(library: library),
         };
     }
   }
@@ -528,6 +535,14 @@ class _SongList extends StatelessWidget {
     if (songs.isEmpty) {
       if (library.query.trim().isNotEmpty) {
         return _Notice(message: context.t('noSearchResults'));
+      }
+      if (library.selectedPlaylistId != null) {
+        return _Notice(
+          message: context.t('emptyPlaylist'),
+          actionLabel: context.t('addSongs'),
+          actionIcon: Icons.playlist_add_rounded,
+          onAction: () => _openAddSongs(context, library),
+        );
       }
       return _Notice(
         message: library.tab == LibraryTab.favorites || library.likedOnly
@@ -693,37 +708,6 @@ class _SongGrid extends StatelessWidget {
   }
 }
 
-class _AlbumList extends StatelessWidget {
-  const _AlbumList({required this.library});
-
-  final LibraryController library;
-
-  @override
-  Widget build(BuildContext context) {
-    final albums = library.visibleAlbums;
-    if (albums.isEmpty) {
-      return _Notice(
-        message: library.query.trim().isNotEmpty
-            ? context.t('noSearchResults')
-            : context.t('noAlbums'),
-      );
-    }
-
-    return ListView.builder(
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: const EdgeInsets.only(right: 20, top: 4, bottom: 20),
-      itemCount: albums.length,
-      itemBuilder: (context, index) => _CollectionRow(
-        title: albums[index],
-        subtitle: context.t('songsCount', {
-          'count': '${library.songCountInAlbum(albums[index])}',
-        }),
-        onTap: () => library.openAlbum(albums[index]),
-      ),
-    );
-  }
-}
-
 class _PlaylistList extends StatelessWidget {
   const _PlaylistList({required this.library});
 
@@ -785,36 +769,6 @@ class _ArtistList extends StatelessWidget {
           'count': '${library.songCountForArtist(artists[index])}',
         }),
         onTap: () => library.openArtist(artists[index]),
-      ),
-    );
-  }
-}
-
-class _GenreList extends StatelessWidget {
-  const _GenreList({required this.library});
-
-  final LibraryController library;
-
-  @override
-  Widget build(BuildContext context) {
-    final genres = library.visibleGenres;
-    if (genres.isEmpty) {
-      return _Notice(
-        message: library.query.trim().isNotEmpty
-            ? context.t('noSearchResults')
-            : context.t('noGenres'),
-      );
-    }
-    return ListView.builder(
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: const EdgeInsets.only(right: 20, top: 4, bottom: 20),
-      itemCount: genres.length,
-      itemBuilder: (context, index) => _CollectionRow(
-        title: genres[index],
-        subtitle: context.t('songsCount', {
-          'count': '${library.songCountForGenre(genres[index])}',
-        }),
-        onTap: () => library.openGenre(genres[index]),
       ),
     );
   }

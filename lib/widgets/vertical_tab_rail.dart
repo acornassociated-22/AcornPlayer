@@ -62,18 +62,10 @@ class VerticalTabRail extends StatelessWidget {
                 child: _AppMark(size: 28),
               ),
               Flexible(
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      for (var index = 0; index < labels.length; index++)
-                        _RailTab(
-                          label: labels[index],
-                          isSelected: index == selectedIndex,
-                          onTap: () => onSelected(index),
-                        ),
-                    ],
-                  ),
+                child: _CenteredTabList(
+                  labels: labels,
+                  selectedIndex: selectedIndex,
+                  onSelected: onSelected,
                 ),
               ),
               if (onSettings != null) ...[
@@ -124,18 +116,11 @@ class _DockRail extends StatelessWidget {
             child: _AppMark(size: 40),
           ),
           Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  for (var index = 0; index < labels.length; index++)
-                    _RailTab(
-                      label: labels[index],
-                      isSelected: index == selectedIndex,
-                      onTap: () => onSelected(index),
-                      dock: true,
-                    ),
-                ],
-              ),
+            child: _CenteredTabList(
+              labels: labels,
+              selectedIndex: selectedIndex,
+              onSelected: onSelected,
+              dock: true,
             ),
           ),
           if (onSettings != null) ...[
@@ -234,6 +219,46 @@ class _AppMark extends StatelessWidget {
   }
 }
 
+/// Tab labels sit in the middle of the rail; they still scroll if they overflow.
+class _CenteredTabList extends StatelessWidget {
+  const _CenteredTabList({
+    required this.labels,
+    required this.selectedIndex,
+    required this.onSelected,
+    this.dock = false,
+  });
+
+  final List<String> labels;
+  final int selectedIndex;
+  final ValueChanged<int> onSelected;
+  final bool dock;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                for (var index = 0; index < labels.length; index++)
+                  _RailTab(
+                    label: labels[index],
+                    isSelected: index == selectedIndex,
+                    onTap: () => onSelected(index),
+                    dock: dock,
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _RailTab extends StatelessWidget {
   const _RailTab({
     required this.label,
@@ -249,53 +274,48 @@ class _RailTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bar = AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      width: dock ? 3 : 2.5,
+      height: isSelected ? (dock ? 38 : 34) : 0,
+      decoration: BoxDecoration(
+        color: context.palette.accent,
+        borderRadius: BorderRadius.circular(2),
+      ),
+    );
+
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: dock ? 14 : 12),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (dock)
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: isSelected ? 3 : 0,
-                height: isSelected ? 38 : 0,
-                margin: const EdgeInsets.only(right: 8),
-                decoration: BoxDecoration(
-                    color: context.palette.accent,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            RotatedBox(
-              quarterTurns: 3,
-              child: AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 200),
-                style: DefaultTextStyle.of(context).style.merge(
-                  AppTextStyles.railLabel.copyWith(
-                    color: isSelected
-                        ? context.palette.textPrimary
-                        : context.palette.textSecondary,
-                    fontSize: dock ? 13 : null,
+        child: SizedBox(
+          width: double.infinity,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              RotatedBox(
+                quarterTurns: 3,
+                child: AnimatedDefaultTextStyle(
+                  duration: const Duration(milliseconds: 200),
+                  style: DefaultTextStyle.of(context).style.merge(
+                    AppTextStyles.railLabel.copyWith(
+                      color: isSelected
+                          ? context.palette.textPrimary
+                          : context.palette.textSecondary,
+                      fontSize: dock ? 13 : null,
+                    ),
                   ),
+                  child: Text(label),
                 ),
-                child: Text(label),
               ),
-            ),
-            if (!dock) ...[
-              const SizedBox(width: 6),
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: 2.5,
-                height: isSelected ? 34 : 0,
-                decoration: BoxDecoration(
-                    color: context.palette.accent,
-                  borderRadius: BorderRadius.circular(2),
-                ),
+              Positioned(
+                left: dock ? 8 : null,
+                right: dock ? null : 4,
+                child: bar,
               ),
             ],
-          ],
+          ),
         ),
       ),
     );

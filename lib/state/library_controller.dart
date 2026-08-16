@@ -5,12 +5,12 @@ import '../l10n/app_strings.dart';
 import '../models/song.dart';
 import '../services/library/library_source.dart';
 
-enum LibraryTab { albums, artists, genres, playlists, songs, favorites }
+enum LibraryTab { artists, playlists, songs, favorites }
 
 enum LibraryStatus { loading, scanning, needsPermission, needsFolder, ready }
 
 /// What the list area of the library screen should render right now.
-enum LibraryView { songs, albums, playlists, artists, genres }
+enum LibraryView { songs, playlists, artists }
 
 enum LibrarySort { title, artist, album, duration, recent, played }
 
@@ -18,7 +18,7 @@ const _folderPreferenceKey = 'music_folder';
 const _sortPreferenceKey = 'library_sort';
 
 /// Holds the scanned library, the liked set and the browsing state (tab,
-/// selected album, artist, genre or playlist).
+/// selected artist or playlist).
 class LibraryController extends ChangeNotifier {
   LibraryController(this._db, this._source);
 
@@ -33,9 +33,7 @@ class LibraryController extends ChangeNotifier {
   LibraryTab _tab = LibraryTab.songs;
   bool _likedOnly = false;
   bool _gridSongs = false;
-  String? _selectedAlbum;
   String? _selectedArtist;
-  String? _selectedGenre;
   int? _selectedPlaylistId;
   List<String> _selectedPlaylistSongIds = const [];
   String? _folder;
@@ -57,13 +55,12 @@ class LibraryController extends ChangeNotifier {
 
   bool get gridSongs => _gridSongs;
 
-  String? get selectedAlbum => _selectedAlbum;
-
   String? get selectedArtist => _selectedArtist;
 
-  String? get selectedGenre => _selectedGenre;
-
   int? get selectedPlaylistId => _selectedPlaylistId;
+
+  /// Song ids already in the opened playlist.
+  Set<String> get openPlaylistSongIds => _selectedPlaylistSongIds.toSet();
 
   String? get folder => _folder;
 
@@ -78,32 +75,21 @@ class LibraryController extends ChangeNotifier {
   bool get isScanning => _status == LibraryStatus.scanning;
 
   bool get canGoBack =>
-      _selectedAlbum != null ||
-      _selectedArtist != null ||
-      _selectedGenre != null ||
-      _selectedPlaylistId != null;
+      _selectedArtist != null || _selectedPlaylistId != null;
 
   LibraryView get view {
-    if (_tab == LibraryTab.albums && _selectedAlbum == null) {
-      return LibraryView.albums;
-    }
     if (_tab == LibraryTab.playlists && _selectedPlaylistId == null) {
       return LibraryView.playlists;
     }
     if (_tab == LibraryTab.artists && _selectedArtist == null) {
       return LibraryView.artists;
     }
-    if (_tab == LibraryTab.genres && _selectedGenre == null) {
-      return LibraryView.genres;
-    }
     return LibraryView.songs;
   }
 
   /// Title shown in the app bar, mirroring the current selection.
   String titleFor(AppStrings strings) {
-    if (_selectedAlbum != null) return _selectedAlbum!;
     if (_selectedArtist != null) return _selectedArtist!;
-    if (_selectedGenre != null) return _selectedGenre!;
     if (_selectedPlaylistId != null) {
       for (final playlist in _playlists) {
         if (playlist.id == _selectedPlaylistId) return playlist.name;
@@ -111,13 +97,11 @@ class LibraryController extends ChangeNotifier {
       return strings['playlist'];
     }
     return switch (_tab) {
-      LibraryTab.albums => strings['albums'],
       LibraryTab.playlists => strings['playlists'],
       LibraryTab.songs =>
         _likedOnly ? strings['likedSongs'] : strings['allSongs'],
       LibraryTab.favorites => strings['favorites'],
       LibraryTab.artists => strings['artists'],
-      LibraryTab.genres => strings['genres'],
     };
   }
 
@@ -127,8 +111,6 @@ class LibraryController extends ChangeNotifier {
   List<String> get albums => _unique(_songs.map((song) => song.album));
 
   List<String> get artists => _unique(_songs.map((song) => song.artist));
-
-  List<String> get genres => _unique(_songs.map((song) => song.genre));
 
   /// Songs currently listed, honouring filters, search and sort.
   List<Song> get visibleSongs {
@@ -140,14 +122,8 @@ class LibraryController extends ChangeNotifier {
     return _sorted(filtered);
   }
 
-  /// Albums matching the current search.
-  List<String> get visibleAlbums => _filterNames(albums);
-
   /// Artists matching the current search.
   List<String> get visibleArtists => _filterNames(artists);
-
-  /// Genres matching the current search.
-  List<String> get visibleGenres => _filterNames(genres);
 
   /// Playlists matching the current search.
   List<Playlist> get visiblePlaylists {
@@ -162,14 +138,8 @@ class LibraryController extends ChangeNotifier {
 
   /// Songs in the current tab or opened collection, before search.
   List<Song> get _scopedSongs {
-    if (_selectedAlbum != null) {
-      return _songs.where((song) => song.album == _selectedAlbum).toList();
-    }
     if (_selectedArtist != null) {
       return _songs.where((song) => song.artist == _selectedArtist).toList();
-    }
-    if (_selectedGenre != null) {
-      return _songs.where((song) => song.genre == _selectedGenre).toList();
     }
     if (_selectedPlaylistId != null) {
       final byId = {for (final song in _songs) song.id: song};
@@ -249,14 +219,8 @@ class LibraryController extends ChangeNotifier {
 
   bool isLiked(Song song) => _likedIds.contains(song.id);
 
-  int songCountInAlbum(String album) =>
-      _songs.where((song) => song.album == album).length;
-
   int songCountForArtist(String artist) =>
       _songs.where((song) => song.artist == artist).length;
-
-  int songCountForGenre(String genre) =>
-      _songs.where((song) => song.genre == genre).length;
 
   /// Loads the persisted cache first, then rescans in the background.
   Future<void> initialise() async {
@@ -337,9 +301,7 @@ class LibraryController extends ChangeNotifier {
   void selectTab(LibraryTab tab) {
     if (_tab == tab) return;
     _tab = tab;
-    _selectedAlbum = null;
     _selectedArtist = null;
-    _selectedGenre = null;
     _selectedPlaylistId = null;
     notifyListeners();
   }
@@ -355,18 +317,8 @@ class LibraryController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void openAlbum(String album) {
-    _selectedAlbum = album;
-    notifyListeners();
-  }
-
   void openArtist(String artist) {
     _selectedArtist = artist;
-    notifyListeners();
-  }
-
-  void openGenre(String genre) {
-    _selectedGenre = genre;
     notifyListeners();
   }
 
@@ -377,9 +329,7 @@ class LibraryController extends ChangeNotifier {
   }
 
   void goBack() {
-    _selectedAlbum = null;
     _selectedArtist = null;
-    _selectedGenre = null;
     _selectedPlaylistId = null;
     _selectedPlaylistSongIds = const [];
     notifyListeners();

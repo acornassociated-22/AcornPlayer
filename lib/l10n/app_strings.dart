@@ -174,6 +174,8 @@ const _en = <String, String>{
   'renamePlaylist': 'Rename playlist',
   'deletePlaylist': 'Delete playlist',
   'removeFromPlaylist': 'Remove from playlist',
+  'emptyPlaylist': 'This playlist is empty. Add songs from your library.',
+  'addSongs': 'Add songs',
 };
 
 const _tr = <String, String>{
@@ -275,6 +277,8 @@ const _tr = <String, String>{
   'renamePlaylist': 'Listeyi yeniden adlandır',
   'deletePlaylist': 'Listeyi sil',
   'removeFromPlaylist': 'Listeden çıkar',
+  'emptyPlaylist': 'Bu çalma listesi boş. Kütüphaneden şarkı ekle.',
+  'addSongs': 'Şarkı ekle',
 };
 
 const _ku = <String, String>{
@@ -376,6 +380,8 @@ const _ku = <String, String>{
   'renamePlaylist': 'Navê lîsteyê biguherîne',
   'deletePlaylist': 'Lîsteyê jê bibe',
   'removeFromPlaylist': 'Ji lîsteyê derxe',
+  'emptyPlaylist': 'Ev lîste vala ye. Ji pirtûkxaneyê stran lê zêde bike.',
+  'addSongs': 'Stranan lê zêde bike',
 };
 
 const _ar = <String, String>{
@@ -477,6 +483,8 @@ const _ar = <String, String>{
   'renamePlaylist': 'إعادة تسمية القائمة',
   'deletePlaylist': 'حذف القائمة',
   'removeFromPlaylist': 'إزالة من القائمة',
+  'emptyPlaylist': 'هذه القائمة فارغة. أضف أغاني من مكتبتك.',
+  'addSongs': 'إضافة أغاني',
 };
 
 const _ru = <String, String>{
@@ -578,6 +586,8 @@ const _ru = <String, String>{
   'renamePlaylist': 'Переименовать список',
   'deletePlaylist': 'Удалить список',
   'removeFromPlaylist': 'Убрать из списка',
+  'emptyPlaylist': 'Этот плейлист пуст. Добавьте песни из библиотеки.',
+  'addSongs': 'Добавить песни',
 };
 
 const _fr = <String, String>{
@@ -679,6 +689,8 @@ const _fr = <String, String>{
   'renamePlaylist': 'Renommer la playlist',
   'deletePlaylist': 'Supprimer la playlist',
   'removeFromPlaylist': 'Retirer de la playlist',
+  'emptyPlaylist': 'Cette playlist est vide. Ajoutez des titres depuis la bibliothèque.',
+  'addSongs': 'Ajouter des titres',
 };
 
 const _fa = <String, String>{
@@ -780,6 +792,8 @@ const _fa = <String, String>{
   'renamePlaylist': 'تغییر نام فهرست',
   'deletePlaylist': 'حذف فهرست',
   'removeFromPlaylist': 'حذف از فهرست',
+  'emptyPlaylist': 'این فهرست خالی است. از کتابخانه آهنگ اضافه کنید.',
+  'addSongs': 'افزودن آهنگ',
 };
 
 const _de = <String, String>{
@@ -881,6 +895,8 @@ const _de = <String, String>{
   'renamePlaylist': 'Playlist umbenennen',
   'deletePlaylist': 'Playlist löschen',
   'removeFromPlaylist': 'Aus Playlist entfernen',
+  'emptyPlaylist': 'Diese Playlist ist leer. Füge Songs aus der Bibliothek hinzu.',
+  'addSongs': 'Songs hinzufügen',
 };
 
 const _vi = <String, String>{
@@ -982,6 +998,8 @@ const _vi = <String, String>{
   'renamePlaylist': 'Đổi tên danh sách',
   'deletePlaylist': 'Xóa danh sách',
   'removeFromPlaylist': 'Gỡ khỏi danh sách',
+  'emptyPlaylist': 'Danh sách này trống. Thêm bài hát từ thư viện.',
+  'addSongs': 'Thêm bài hát',
 };
 
 const _ja = <String, String>{
@@ -1083,6 +1101,8 @@ const _ja = <String, String>{
   'renamePlaylist': 'プレイリスト名を変更',
   'deletePlaylist': 'プレイリストを削除',
   'removeFromPlaylist': 'プレイリストから削除',
+  'emptyPlaylist': 'このプレイリストは空です。ライブラリから曲を追加してください。',
+  'addSongs': '曲を追加',
 };
 
 const _zh = <String, String>{
@@ -1184,6 +1204,8 @@ const _zh = <String, String>{
   'renamePlaylist': '重命名播放列表',
   'deletePlaylist': '删除播放列表',
   'removeFromPlaylist': '从播放列表移除',
+  'emptyPlaylist': '此播放列表为空。从曲库添加歌曲。',
+  'addSongs': '添加歌曲',
 };
 
 const _tables = <AppLocale, Map<String, String>>{
