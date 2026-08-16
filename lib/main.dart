@@ -1,9 +1,14 @@
+import 'dart:io';
+
+import 'package:audio_service/audio_service.dart';
+import 'package:audio_service_mpris/audio_service_mpris.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'app.dart';
 import 'data/database.dart';
+import 'services/acorn_audio_handler.dart';
 import 'services/app_platform.dart';
 import 'services/artwork_cache.dart';
 import 'services/audio_player_service.dart';
@@ -21,29 +26,65 @@ Future<void> main() async {
 
   final database = AppDatabase();
   final librarySource = FolderLibrarySource();
+  final artwork = ArtworkCache(librarySource);
   final settings = SettingsController(database);
   await settings.load();
+
+  final library = LibraryController(database, librarySource);
+  final player = PlayerController(
+    AudioPlayerService(),
+    systemVolume: DeviceSystemVolume(),
+    database: database,
+    onTrackPlayed: library.recordPlay,
+  );
+  await library.initialise();
+  await player.restoreSession(library.allSongs);
+  await _initMediaSession(player, artwork);
 
   runApp(
     MultiProvider(
       providers: [
         Provider<AppDatabase>.value(value: database),
-        Provider<ArtworkCache>(create: (_) => ArtworkCache(librarySource)),
+        Provider<ArtworkCache>.value(value: artwork),
         ChangeNotifierProvider<SettingsController>.value(value: settings),
-        ChangeNotifierProvider<PlayerController>(
-          create: (_) => PlayerController(
-            AudioPlayerService(),
-            systemVolume: DeviceSystemVolume(),
-          ),
-        ),
-        ChangeNotifierProvider<LibraryController>(
-          create: (_) =>
-              LibraryController(database, librarySource)..initialise(),
-        ),
+        ChangeNotifierProvider<PlayerController>.value(value: player),
+        ChangeNotifierProvider<LibraryController>.value(value: library),
       ],
       child: const AcornApp(),
     ),
   );
+}
+
+/// Registers MPRIS / SMTC / Android media session around [player].
+Future<void> _initMediaSession(
+  PlayerController player,
+  ArtworkCache artwork,
+) async {
+  if (Platform.isLinux) {
+    AudioServiceMpris.init(
+      dBusName: 'AcornPlayer',
+      identity: 'Acorn Player',
+      desktopEntry: 'acorn-player',
+      canGoNext: true,
+      canGoPrevious: true,
+      canPlay: true,
+      canPause: true,
+      canControl: true,
+    );
+  }
+  try {
+    await AudioService.init(
+      builder: () => AcornAudioHandler(player, artwork),
+      config: const AudioServiceConfig(
+        androidNotificationChannelId: 'com.acorn.acorn_player.channel.audio',
+        androidNotificationChannelName: 'Acorn Player',
+        androidNotificationOngoing: true,
+        androidStopForegroundOnPause: true,
+      ),
+    );
+  } catch (_) {
+    // OS session is optional; playback still works inside the app.
+  }
 }
 
 /// Opens a frameless desktop window; the caption bar lives inside the app.
