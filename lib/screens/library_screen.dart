@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../data/database.dart';
 import '../models/song.dart';
 import '../state/library_controller.dart';
 import '../state/player_controller.dart';
@@ -11,6 +12,7 @@ import '../widgets/app_top_bar.dart';
 import '../widgets/mini_player.dart';
 import '../widgets/neu_container.dart';
 import '../widgets/neu_icon_button.dart';
+import '../widgets/queue_panel.dart';
 import '../widgets/settings_panel.dart';
 import '../widgets/song_grid_card.dart';
 import '../widgets/song_tile.dart';
@@ -31,6 +33,8 @@ class LibraryScreen extends StatelessWidget {
     final wide = MediaQuery.sizeOf(context).width >= _wideBreakpoint;
     final labels = [
       context.t('albums'),
+      context.t('artists'),
+      context.t('genres'),
       context.t('playlists'),
       context.t('songs'),
       context.t('favorites'),
@@ -104,6 +108,31 @@ class LibraryScreen extends StatelessWidget {
   }
 }
 
+/// Picks how the current song list is ordered.
+void _showSortMenu(BuildContext context, LibraryController library) {
+  showActionSheet(
+    context,
+    title: context.t('sortBy'),
+    items: [
+      for (final sort in LibrarySort.values)
+        ActionSheetItem(
+          icon: library.sort == sort
+              ? Icons.check_rounded
+              : Icons.sort_rounded,
+          label: context.t(switch (sort) {
+            LibrarySort.title => 'sortTitle',
+            LibrarySort.artist => 'sortArtist',
+            LibrarySort.album => 'sortAlbum',
+            LibrarySort.duration => 'sortDuration',
+            LibrarySort.recent => 'sortRecent',
+            LibrarySort.played => 'sortPlayed',
+          }),
+          onTap: () => library.setSort(sort),
+        ),
+    ],
+  );
+}
+
 class _LibraryMain extends StatelessWidget {
   const _LibraryMain({
     required this.library,
@@ -117,15 +146,26 @@ class _LibraryMain extends StatelessWidget {
   final bool wide;
   final VoidCallback onMenu;
 
-  /// List/grid toggle, only on song views.
-  Widget? _layoutToggle(LibraryController library) {
+  /// List/grid toggle and sort, only on song views.
+  Widget? _layoutToggle(BuildContext context, LibraryController library) {
     if (library.view != LibraryView.songs) return null;
-    return NeuIconButton(
-      icon: library.gridSongs
-          ? Icons.view_list_rounded
-          : Icons.grid_view_rounded,
-      iconSize: 18,
-      onPressed: library.toggleSongLayout,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        NeuIconButton(
+          icon: Icons.sort_rounded,
+          iconSize: 18,
+          onPressed: () => _showSortMenu(context, library),
+        ),
+        const SizedBox(width: 8),
+        NeuIconButton(
+          icon: library.gridSongs
+              ? Icons.view_list_rounded
+              : Icons.grid_view_rounded,
+          iconSize: 18,
+          onPressed: library.toggleSongLayout,
+        ),
+      ],
     );
   }
 
@@ -144,19 +184,18 @@ class _LibraryMain extends StatelessWidget {
                           title: library.titleFor(context.strings),
                           onBack: library.canGoBack ? library.goBack : null,
                           onMore: onMenu,
-                          trailing: _layoutToggle(library),
+                          trailing: _layoutToggle(context, library),
                         ),
                       ),
-                      if (library.view == LibraryView.songs)
-                        const Padding(
-                          padding: EdgeInsets.fromLTRB(28, 2, 28, 6),
-                          child: Center(
-                            child: SizedBox(
-                              width: 360,
-                              child: _SongSearchField(),
-                            ),
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(28, 2, 28, 6),
+                        child: Center(
+                          child: SizedBox(
+                            width: 360,
+                            child: _SongSearchField(),
                           ),
                         ),
+                      ),
                       Expanded(
                         child: Center(
                           child: ConstrainedBox(
@@ -178,7 +217,7 @@ class _LibraryMain extends StatelessWidget {
                         title: library.titleFor(context.strings),
                         onBack: library.canGoBack ? library.goBack : null,
                         onMore: onMenu,
-                        trailing: _layoutToggle(library),
+                        trailing: _layoutToggle(context, library),
                       ),
                     ),
                     Expanded(
@@ -187,6 +226,8 @@ class _LibraryMain extends StatelessWidget {
                           VerticalTabRail(
                             labels: [
                               context.t('albums'),
+                              context.t('artists'),
+                              context.t('genres'),
                               context.t('playlists'),
                               context.t('songs'),
                               context.t('favorites'),
@@ -199,23 +240,22 @@ class _LibraryMain extends StatelessWidget {
                           Expanded(
                             child: Column(
                               children: [
-                                if (library.view == LibraryView.songs)
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                      8,
-                                      2,
-                                      16,
-                                      8,
-                                    ),
-                                    child: Center(
-                                      child: ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth: 360,
-                                        ),
-                                        child: const _SongSearchField(),
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    8,
+                                    2,
+                                    16,
+                                    8,
+                                  ),
+                                  child: Center(
+                                    child: ConstrainedBox(
+                                      constraints: const BoxConstraints(
+                                        maxWidth: 360,
                                       ),
+                                      child: const _SongSearchField(),
                                     ),
                                   ),
+                                ),
                                 Expanded(
                                   child: _Body(
                                     library: library,
@@ -251,6 +291,7 @@ class _LibraryMain extends StatelessWidget {
             speed: player.speed,
             onCycleSpeed: player.cycleSpeed,
             embedded: wide,
+            onQueue: () => QueuePanel.open(context),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const NowPlayingScreen()),
             ),
@@ -431,6 +472,8 @@ class _Body extends StatelessWidget {
         return Center(
           child: CircularProgressIndicator(color: context.palette.accent),
         );
+      case LibraryStatus.scanning:
+        return _ScanProgress(library: library);
       case LibraryStatus.needsPermission:
         return _Notice(
           message: context.t('needsPermission'),
@@ -449,6 +492,8 @@ class _Body extends StatelessWidget {
           LibraryView.songs => _SongList(library: library, player: player),
           LibraryView.albums => _AlbumList(library: library),
           LibraryView.playlists => _PlaylistList(library: library),
+          LibraryView.artists => _ArtistList(library: library),
+          LibraryView.genres => _GenreList(library: library),
         };
     }
   }
@@ -500,6 +545,24 @@ class _SongList extends StatelessWidget {
               player: player,
               onMore: (song) => _showSongMenu(context, song),
             )
+          : library.selectedPlaylistId != null
+          ? ReorderableListView.builder(
+              key: const ValueKey('playlist'),
+              padding: const EdgeInsets.only(right: 20, top: 4, bottom: 20),
+              itemCount: songs.length,
+              onReorderItem: library.reorderPlaylistSongs,
+              itemBuilder: (context, index) {
+                final song = songs[index];
+                return SongTile(
+                  key: ValueKey(song.id),
+                  song: song,
+                  isActive: player.current == song,
+                  isPlaying: player.isPlaying,
+                  onTap: () => player.playQueue(songs, index),
+                  onMore: () => _showSongMenu(context, song),
+                );
+              },
+            )
           : ListView.builder(
               key: const ValueKey('list'),
               padding: const EdgeInsets.only(right: 20, top: 4, bottom: 20),
@@ -524,6 +587,16 @@ class _SongList extends StatelessWidget {
       title: song.title,
       items: [
         ActionSheetItem(
+          icon: Icons.playlist_play_rounded,
+          label: context.t('playNext'),
+          onTap: () => player.playNext(song),
+        ),
+        ActionSheetItem(
+          icon: Icons.queue_music_rounded,
+          label: context.t('addToQueue'),
+          onTap: () => player.addToQueue(song),
+        ),
+        ActionSheetItem(
           icon: library.isLiked(song)
               ? Icons.favorite_border
               : Icons.favorite_rounded,
@@ -532,6 +605,15 @@ class _SongList extends StatelessWidget {
               : context.t('addToFavorites'),
           onTap: () => library.toggleLike(song),
         ),
+        if (library.selectedPlaylistId != null)
+          ActionSheetItem(
+            icon: Icons.remove_circle_outline_rounded,
+            label: context.t('removeFromPlaylist'),
+            onTap: () => library.removeFromPlaylist(
+              library.selectedPlaylistId!,
+              song,
+            ),
+          ),
         for (final playlist in library.playlists)
           ActionSheetItem(
             icon: Icons.playlist_add_rounded,
@@ -589,9 +671,13 @@ class _AlbumList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final albums = library.albums;
+    final albums = library.visibleAlbums;
     if (albums.isEmpty) {
-      return _Notice(message: context.t('noAlbums'));
+      return _Notice(
+        message: library.query.trim().isNotEmpty
+            ? context.t('noSearchResults')
+            : context.t('noAlbums'),
+      );
     }
 
     return ListView.builder(
@@ -615,9 +701,13 @@ class _PlaylistList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final playlists = library.playlists;
+    final playlists = library.visiblePlaylists;
     if (playlists.isEmpty) {
-      return _Notice(message: context.t('noPlaylists'));
+      return _Notice(
+        message: library.query.trim().isNotEmpty
+            ? context.t('noSearchResults')
+            : context.t('noPlaylists'),
+      );
     }
 
     return ListView.builder(
@@ -625,9 +715,121 @@ class _PlaylistList extends StatelessWidget {
       itemCount: playlists.length,
       itemBuilder: (context, index) => _CollectionRow(
         title: playlists[index].name,
-        subtitle: context.t('playlist'),
+        subtitle: context.t('songsCount', {
+          'count': '${library.playlistCount(playlists[index].id)}',
+        }),
         onTap: () => library.openPlaylist(playlists[index].id),
+        onLongPress: () => _showPlaylistMenu(context, library, playlists[index]),
       ),
+    );
+  }
+}
+
+class _ArtistList extends StatelessWidget {
+  const _ArtistList({required this.library});
+
+  final LibraryController library;
+
+  @override
+  Widget build(BuildContext context) {
+    final artists = library.visibleArtists;
+    if (artists.isEmpty) {
+      return _Notice(
+        message: library.query.trim().isNotEmpty
+            ? context.t('noSearchResults')
+            : context.t('noArtists'),
+      );
+    }
+    return ListView.builder(
+      padding: const EdgeInsets.only(right: 20, top: 4, bottom: 20),
+      itemCount: artists.length,
+      itemBuilder: (context, index) => _CollectionRow(
+        title: artists[index],
+        subtitle: context.t('songsCount', {
+          'count': '${library.songCountForArtist(artists[index])}',
+        }),
+        onTap: () => library.openArtist(artists[index]),
+      ),
+    );
+  }
+}
+
+class _GenreList extends StatelessWidget {
+  const _GenreList({required this.library});
+
+  final LibraryController library;
+
+  @override
+  Widget build(BuildContext context) {
+    final genres = library.visibleGenres;
+    if (genres.isEmpty) {
+      return _Notice(
+        message: library.query.trim().isNotEmpty
+            ? context.t('noSearchResults')
+            : context.t('noGenres'),
+      );
+    }
+    return ListView.builder(
+      padding: const EdgeInsets.only(right: 20, top: 4, bottom: 20),
+      itemCount: genres.length,
+      itemBuilder: (context, index) => _CollectionRow(
+        title: genres[index],
+        subtitle: context.t('songsCount', {
+          'count': '${library.songCountForGenre(genres[index])}',
+        }),
+        onTap: () => library.openGenre(genres[index]),
+      ),
+    );
+  }
+}
+
+/// Lets the user rename or delete a playlist.
+void _showPlaylistMenu(
+  BuildContext context,
+  LibraryController library,
+  Playlist playlist,
+) {
+  showActionSheet(
+    context,
+    title: playlist.name,
+    items: [
+      ActionSheetItem(
+        icon: Icons.edit_rounded,
+        label: context.t('renamePlaylist'),
+        onTap: () async {
+          final name = await showNamePrompt(
+            context,
+            title: context.t('renamePlaylist'),
+          );
+          if (name == null || name.isEmpty) return;
+          await library.renamePlaylist(playlist.id, name);
+        },
+      ),
+      ActionSheetItem(
+        icon: Icons.delete_outline_rounded,
+        label: context.t('deletePlaylist'),
+        onTap: () => library.deletePlaylist(playlist.id),
+      ),
+    ],
+  );
+}
+
+class _ScanProgress extends StatelessWidget {
+  const _ScanProgress({required this.library});
+
+  final LibraryController library;
+
+  @override
+  Widget build(BuildContext context) {
+    final total = library.scanTotal;
+    final label = total == 0
+        ? context.t('scanning')
+        : '${context.t('scanning')} ${library.scanDone} / $total';
+    return _Notice(
+      message: label,
+      actionLabel: context.t('cancelScan'),
+      actionIcon: Icons.close_rounded,
+      onAction: library.cancelScan,
     );
   }
 }
@@ -637,16 +839,19 @@ class _CollectionRow extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.onTap,
+    this.onLongPress,
   });
 
   final String title;
   final String subtitle;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
+      onLongPress: onLongPress,
       behavior: HitTestBehavior.opaque,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 17),
