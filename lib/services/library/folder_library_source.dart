@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:audio_metadata_reader/audio_metadata_reader.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 import 'package:permission_handler/permission_handler.dart';
 
@@ -52,8 +53,20 @@ class FolderLibrarySource implements LibrarySource {
   }
 
   @override
-  Future<String?> pickFolder() =>
-      FilePicker.getDirectoryPath(dialogTitle: 'Choose your music folder');
+  Future<String?> pickFolder() async {
+    if (Platform.isMacOS) return _pickMacosFolder();
+    return FilePicker.getDirectoryPath(dialogTitle: 'Choose your music folder');
+  }
+
+  /// Uses the Runner NSOpenPanel so folder picking works without App Sandbox.
+  Future<String?> _pickMacosFolder() async {
+    try {
+      return await const MethodChannel('com.acorn.acorn_player/folder_picker')
+          .invokeMethod<String>('pickFolder');
+    } catch (_) {
+      return null;
+    }
+  }
 
   @override
   Future<List<Song>> loadSongs({

@@ -28,5 +28,15 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSDesktopFolderUsageDescription</key>
+	<string>Acorn Player needs access to play music stored on your Desktop.</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>Acorn Player needs access to play music stored in your Documents folder.</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>Acorn Player needs access to play music stored in your Downloads folder.</string>
+	<key>NSRemovableVolumesUsageDescription</key>
+	<string>Acorn Player needs access to play music from external drives.</string>
+	<key>NSNetworkVolumesUsageDescription</key>
+	<string>Acorn Player needs access to play music from network volumes.</string>
 </dict>
 </plist>

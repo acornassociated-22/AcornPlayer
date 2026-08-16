@@ -5,6 +5,11 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      macos_only:
+        description: "Build and replace only the macOS DMG on the current version tag"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -14,6 +19,7 @@ env:
 
 jobs:
   linux:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.macos_only != true }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -40,6 +46,7 @@ jobs:
           if-no-files-found: error
 
   android:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.macos_only != true }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -63,6 +70,7 @@ jobs:
           if-no-files-found: error
 
   windows:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.macos_only != true }}
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -134,6 +142,7 @@ jobs:
           if-no-files-found: error
 
   ios:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.macos_only != true }}
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -159,6 +168,7 @@ jobs:
 
   publish:
     needs: [linux, android, windows, macos, ios]
+    if: ${{ always() && !cancelled() && needs.macos.result == 'success' && (inputs.macos_only == true || (needs.linux.result == 'success' && needs.android.result == 'success' && needs.windows.result == 'success' && needs.ios.result == 'success')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
