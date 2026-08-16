@@ -3,6 +3,7 @@ import 'package:window_manager/window_manager.dart';
 
 import '../services/app_platform.dart';
 import '../theme/acorn_palette.dart';
+import 'desktop_playback_shortcuts.dart';
 import 'desktop_title_bar.dart';
 
 /// Mobile renders the screens full bleed; desktop puts the very same screens in
@@ -24,7 +25,9 @@ class AppShell extends StatelessWidget {
       ),
     );
 
-    if (!AppPlatform.needsResizeHandles) return window;
-    return DragToResizeArea(child: window);
+    final framed = AppPlatform.needsResizeHandles
+        ? DragToResizeArea(child: window)
+        : window;
+    return DesktopPlaybackShortcuts(child: framed);
   }
 }

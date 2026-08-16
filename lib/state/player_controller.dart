@@ -397,6 +397,9 @@ class PlayerController extends ChangeNotifier {
     await _persistSession();
   }
 
+  /// Steps the volume by [delta], used by desktop keyboard shortcuts.
+  Future<void> nudgeVolume(double delta) => setVolume(_volume + delta);
+
   /// Silences the player, or restores the last audible level.
   Future<void> toggleMute() =>
       setVolume(_volume > 0 ? 0 : (_volumeBeforeMute == 0 ? 0.7 : _volumeBeforeMute));
