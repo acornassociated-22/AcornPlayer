@@ -15,17 +15,13 @@
   <a href="https://github.com/acornassociated-22/AcornPlayer/stargazers"><img src="https://img.shields.io/github/stars/acornassociated-22/AcornPlayer?style=for-the-badge&color=242430&labelColor=141416" alt="Stars" /></a>
 </p>
 
-<div align="center">
-
-| Package | Version |
-|:--|:—:|
-| [Android APK](https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.2.1.apk) | 1.2.1 |
-| [Linux .deb](https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.2.1_amd64.deb) | 1.2.1 |
-| [Windows .exe](https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.2.1_windows_x64_setup.exe) | 1.2.1 |
-| [macOS .dmg](https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.2.1_macos.dmg) | 1.2.1 |
-| [iOS .ipa](https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.2.1_ios_unsigned.ipa) | 1.2.1 |
-
-</div>
+<p align="center">
+  <a href="https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.2.1.apk"><img src="https://img.shields.io/badge/Android_APK-1.2.1-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android APK 1.2.1" /></a><br/>
+  <a href="https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.2.1_amd64.deb"><img src="https://img.shields.io/badge/Linux_.deb-1.2.1-E95420?style=for-the-badge&logo=linux&logoColor=white" alt="Linux deb 1.2.1" /></a><br/>
+  <a href="https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.2.1_windows_x64_setup.exe"><img src="https://img.shields.io/badge/Windows_.exe-1.2.1-0078D6?style=for-the-badge&logo=windows&logoColor=white" alt="Windows exe 1.2.1" /></a><br/>
+  <a href="https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.2.1_macos.dmg"><img src="https://img.shields.io/badge/macOS_.dmg-1.2.1-000000?style=for-the-badge&logo=apple&logoColor=white" alt="macOS dmg 1.2.1" /></a><br/>
+  <a href="https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.2.1_ios_unsigned.ipa"><img src="https://img.shields.io/badge/iOS_.ipa-1.2.1-000000?style=for-the-badge&logo=apple&logoColor=white" alt="iOS ipa 1.2.1" /></a>
+</p>
 
 <p align="center">
   <a href="https://github.com/acornassociated-22/AcornPlayer/releases/latest"><strong>⬇ Download latest release</strong></a>
