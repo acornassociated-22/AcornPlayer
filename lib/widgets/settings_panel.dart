@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
@@ -7,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../data/acorn_links.dart';
 import '../l10n/app_strings.dart';
 import '../state/library_controller.dart';
+import '../state/player_controller.dart';
 import '../state/settings_controller.dart';
 import '../theme/acorn_palette.dart';
 import '../theme/neu_style.dart';
@@ -85,6 +88,7 @@ class _SettingsSheet extends StatelessWidget {
 enum _HubId {
   language(Icons.translate_rounded),
   library(Icons.library_music_rounded),
+  equalizer(Icons.equalizer_rounded),
   contact(Icons.alternate_email_rounded),
   social(Icons.share_outlined),
   donate(Icons.volunteer_activism_rounded),
@@ -153,6 +157,7 @@ class _SettingsBodyState extends State<_SettingsBody> {
 String _titleFor(BuildContext context, _HubId id) => switch (id) {
   _HubId.language => context.t('language'),
   _HubId.library => context.t('librarySection'),
+  _HubId.equalizer => context.t('equalizer'),
   _HubId.contact => context.t('contact'),
   _HubId.social => context.t('social'),
   _HubId.donate => context.t('donate'),
@@ -167,6 +172,7 @@ String _subtitleFor(BuildContext context, _HubId id) {
     _HubId.language => settings.locale.nativeName,
     _HubId.library =>
       '${context.t('musicFolder')} · ${context.t('rescanLibrary')}',
+    _HubId.equalizer => context.t('equalizer'),
     _HubId.contact =>
       '${context.t('contactInfo')} · ${context.t('contactSupport')}',
     _HubId.social => 'Facebook · Instagram · GitHub',
@@ -178,6 +184,7 @@ String _subtitleFor(BuildContext context, _HubId id) {
 Widget _contentFor(_HubId id) => switch (id) {
   _HubId.language => const _LanguageSection(),
   _HubId.library => const _LibrarySection(),
+  _HubId.equalizer => const _EqualizerSection(),
   _HubId.contact => const _ContactSection(),
   _HubId.social => const _SocialSection(),
   _HubId.donate => const _DonateSection(),
@@ -261,6 +268,7 @@ class _HubList extends StatelessWidget {
         const _RiseIn(index: 1, child: _AppearanceSection()),
         const SizedBox(height: 20),
         for (final id in _HubId.values)
+          if (id != _HubId.equalizer || Platform.isAndroid)
           Padding(
             padding: const EdgeInsets.only(bottom: 10),
             child: _RiseIn(
@@ -792,6 +800,143 @@ class _DashboardCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Five-band Android equalizer with a few named presets.
+class _EqualizerSection extends StatefulWidget {
+  const _EqualizerSection();
+
+  @override
+  State<_EqualizerSection> createState() => _EqualizerSectionState();
+}
+
+class _EqualizerSectionState extends State<_EqualizerSection> {
+  List<double> _gains = const [0, 0, 0, 0, 0];
+  double _min = -12;
+  double _max = 12;
+  bool _ready = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  /// Reads the live band layout once the Android player is active.
+  Future<void> _load() async {
+    final equalizer = context.read<PlayerController>().equalizer;
+    if (equalizer == null) return;
+    await equalizer.setEnabled(true);
+    final parameters = await equalizer.parameters;
+    if (!mounted) return;
+    setState(() {
+      _min = parameters.minDecibels;
+      _max = parameters.maxDecibels;
+      _gains = [for (final band in parameters.bands) band.gain];
+      _ready = true;
+    });
+  }
+
+  Future<void> _setBand(int index, double gain) async {
+    final equalizer = context.read<PlayerController>().equalizer;
+    if (equalizer == null) return;
+    final parameters = await equalizer.parameters;
+    await parameters.bands[index].setGain(gain);
+    if (!mounted) return;
+    setState(() {
+      _gains = [
+        for (var i = 0; i < _gains.length; i++) i == index ? gain : _gains[i],
+      ];
+    });
+  }
+
+  Future<void> _applyPreset(List<double> gains) async {
+    for (var i = 0; i < gains.length && i < _gains.length; i++) {
+      await _setBand(i, gains[i]);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!Platform.isAndroid) {
+      return Text(context.t('equalizer'), style: context.styleListSubtitle);
+    }
+    if (!_ready) {
+      return Center(
+        child: CircularProgressIndicator(color: context.palette.accent),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SectionLabel(context.t('equalizer')),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _PresetChip(
+              label: context.t('eqFlat'),
+              onTap: () => _applyPreset(const [0, 0, 0, 0, 0]),
+            ),
+            _PresetChip(
+              label: context.t('eqBass'),
+              onTap: () => _applyPreset(const [6, 3, 0, -1, -2]),
+            ),
+            _PresetChip(
+              label: context.t('eqTreble'),
+              onTap: () => _applyPreset(const [-2, -1, 0, 3, 6]),
+            ),
+            _PresetChip(
+              label: context.t('eqVocal'),
+              onTap: () => _applyPreset(const [-1, 2, 5, 2, -1]),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        for (var index = 0; index < _gains.length; index++)
+          Row(
+            children: [
+              SizedBox(
+                width: 36,
+                child: Text(
+                  '${index + 1}',
+                  style: context.styleMiniLabel,
+                ),
+              ),
+              Expanded(
+                child: Slider(
+                  value: _gains[index].clamp(_min, _max),
+                  min: _min,
+                  max: _max,
+                  activeColor: context.palette.accent,
+                  onChanged: (value) => _setBand(index, value),
+                ),
+              ),
+            ],
+          ),
+      ],
+    );
+  }
+}
+
+class _PresetChip extends StatelessWidget {
+  const _PresetChip({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: NeuContainer(
+        radius: 16,
+        depth: 3,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Text(label, style: context.styleMiniLabel),
       ),
     );
   }
