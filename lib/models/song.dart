@@ -14,6 +14,16 @@ class Song {
     this.album,
     this.duration = Duration.zero,
     this.mediaStoreId,
+    this.genre,
+    this.year,
+    this.trackNumber,
+    this.discNumber,
+    this.albumArtist,
+    this.addedAt,
+    this.playCount = 0,
+    this.lastPlayedAt,
+    this.fileModified,
+    this.fileSize,
   });
 
   /// Stable identity: the file path on desktop, `mediastore:<id>` on mobile.
@@ -28,6 +38,55 @@ class Song {
 
   /// MediaStore identifier, required to read artwork on Android and iOS.
   final int? mediaStoreId;
+
+  final String? genre;
+  final int? year;
+  final int? trackNumber;
+  final int? discNumber;
+  final String? albumArtist;
+  final DateTime? addedAt;
+  final int playCount;
+  final DateTime? lastPlayedAt;
+  final int? fileModified;
+  final int? fileSize;
+
+  /// Returns a copy with the given fields replaced.
+  Song copyWith({
+    String? title,
+    String? artist,
+    String? album,
+    Duration? duration,
+    String? genre,
+    int? year,
+    int? trackNumber,
+    int? discNumber,
+    String? albumArtist,
+    DateTime? addedAt,
+    int? playCount,
+    DateTime? lastPlayedAt,
+    int? fileModified,
+    int? fileSize,
+  }) {
+    return Song(
+      id: id,
+      title: title ?? this.title,
+      artist: artist ?? this.artist,
+      source: source,
+      album: album ?? this.album,
+      duration: duration ?? this.duration,
+      mediaStoreId: mediaStoreId,
+      genre: genre ?? this.genre,
+      year: year ?? this.year,
+      trackNumber: trackNumber ?? this.trackNumber,
+      discNumber: discNumber ?? this.discNumber,
+      albumArtist: albumArtist ?? this.albumArtist,
+      addedAt: addedAt ?? this.addedAt,
+      playCount: playCount ?? this.playCount,
+      lastPlayedAt: lastPlayedAt ?? this.lastPlayedAt,
+      fileModified: fileModified ?? this.fileModified,
+      fileSize: fileSize ?? this.fileSize,
+    );
+  }
 
   @override
   bool operator ==(Object other) => other is Song && other.id == id;

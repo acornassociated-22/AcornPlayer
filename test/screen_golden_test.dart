@@ -61,7 +61,13 @@ class _FakeLibrarySource implements LibrarySource {
   Future<String?> pickFolder() async => null;
 
   @override
-  Future<List<Song>> loadSongs({String? folder}) async => _songs();
+  Future<List<Song>> loadSongs({
+    String? folder,
+    Map<String, Song> cached = const {},
+    void Function(int done, int total)? onProgress,
+    bool Function()? isCancelled,
+  }) async =>
+      _songs();
 
   @override
   Future<Uint8List?> artwork(Song song) async => covers[song.id];
@@ -88,7 +94,35 @@ class _FakeAudioService extends AudioPlayerService {
   bool get isPlaying => true;
 
   @override
-  Future<void> load(Song song) async {}
+  Stream<int?> get currentIndexStream => const Stream.empty();
+
+  @override
+  Future<void> setQueue(
+    List<Song> songs, {
+    int initialIndex = 0,
+    Duration initialPosition = Duration.zero,
+  }) async {}
+
+  @override
+  Future<void> insertAt(int index, Song song) async {}
+
+  @override
+  Future<void> add(Song song) async {}
+
+  @override
+  Future<void> removeAt(int index) async {}
+
+  @override
+  Future<void> move(int from, int to) async {}
+
+  @override
+  Future<void> seekToNext() async {}
+
+  @override
+  Future<void> seekToPrevious() async {}
+
+  @override
+  Future<void> setLoopMode(LoopMode mode) async {}
 
   @override
   Future<void> play() async {}
