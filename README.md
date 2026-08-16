@@ -55,6 +55,8 @@
   &nbsp;·&nbsp;
   <a href="#-screens">Desktop</a>
   &nbsp;·&nbsp;
+  <a href="#-promo">Promo</a>
+  &nbsp;·&nbsp;
   <a href="#-build-from-source">Build</a>
   &nbsp;·&nbsp;
   <a href="#-support--acorn-associated">Support</a>
@@ -237,6 +239,56 @@
 
 <p align="center">
   <img src="promo/promo-08-end-card.png" width="880" alt="Acorn Player — Play it locally. Local library · soft-UI player · no account, ever" />
+</p>
+
+---
+
+## 🎞 Promo
+
+<p align="center">
+  <strong>Play it locally.</strong><br/>
+  <sub>Real mobile and desktop captures · soft-UI · one feel</sub>
+</p>
+
+<p align="center">
+  <img src="promo/promo-neu-01-hero.png" width="880" alt="Acorn Player — Play it locally." />
+</p>
+
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <b>Library</b><br/>
+      <a href="promo/promo-neu-02-library.png"><img src="promo/promo-neu-02-library.png" width="100%" alt="Library" /></a>
+    </td>
+    <td width="50%" align="center">
+      <b>Now playing</b><br/>
+      <a href="promo/promo-neu-03-now-playing.png"><img src="promo/promo-neu-03-now-playing.png" width="100%" alt="Now playing" /></a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <b>Vinyl grid</b><br/>
+      <a href="promo/promo-neu-04-vinyl-grid.png"><img src="promo/promo-neu-04-vinyl-grid.png" width="100%" alt="Vinyl grid" /></a>
+    </td>
+    <td align="center">
+      <b>Queue</b><br/>
+      <a href="promo/promo-neu-05-queue.png"><img src="promo/promo-neu-05-queue.png" width="100%" alt="Queue" /></a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <b>Settings</b><br/>
+      <a href="promo/promo-neu-06-settings.png"><img src="promo/promo-neu-06-settings.png" width="100%" alt="Settings" /></a>
+    </td>
+    <td align="center">
+      <b>Five platforms</b><br/>
+      <a href="promo/promo-neu-07-platforms.png"><img src="promo/promo-neu-07-platforms.png" width="100%" alt="Linux, Windows, macOS, Android, iOS" /></a>
+    </td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="promo/promo-neu-08-end-card.png" width="880" alt="Acorn Player — Play it locally." />
 </p>
 
 ---
