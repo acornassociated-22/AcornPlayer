@@ -36,6 +36,7 @@ class MiniPlayer extends StatelessWidget {
     this.onToggleShuffle,
     this.speed = 1,
     this.onCycleSpeed,
+    this.onQueue,
     this.embedded = false,
   });
 
@@ -60,6 +61,7 @@ class MiniPlayer extends StatelessWidget {
   final VoidCallback? onToggleShuffle;
   final double speed;
   final VoidCallback? onCycleSpeed;
+  final VoidCallback? onQueue;
 
   /// Painted by the desktop chrome; skip a second background.
   final bool embedded;
@@ -156,6 +158,15 @@ class MiniPlayer extends StatelessWidget {
                   size: 40,
                   iconSize: 19,
                   onPressed: onNext,
+                ),
+              ],
+              if (onQueue != null) ...[
+                const SizedBox(width: 10),
+                NeuIconButton(
+                  icon: Icons.queue_music_rounded,
+                  size: 40,
+                  iconSize: 18,
+                  onPressed: onQueue,
                 ),
               ],
               const SizedBox(width: 14),
