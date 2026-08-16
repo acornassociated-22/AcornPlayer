@@ -44,41 +44,55 @@ class VerticalTabRail extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(left: 10, right: 4),
-      child: NeuContainer(
-        width: width,
-        radius: width / 2,
-        depth: 7,
-        blur: 22,
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Padding(
-              padding: EdgeInsets.only(bottom: 10, top: 4),
-              child: _AppMark(size: 28),
-            ),
-            for (var index = 0; index < labels.length; index++)
-              _RailTab(
-                label: labels[index],
-                isSelected: index == selectedIndex,
-                onTap: () => onSelected(index),
-              ),
-            if (onSettings != null) ...[
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height - 180,
+        ),
+        child: NeuContainer(
+          width: width,
+          radius: width / 2,
+          depth: 7,
+          blur: 22,
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
               const Padding(
-                padding: EdgeInsets.only(top: 8),
-                child: _ThemeSlider(compact: true),
+                padding: EdgeInsets.only(bottom: 10, top: 4),
+                child: _AppMark(size: 28),
               ),
-              Padding(
-                padding: const EdgeInsets.only(top: 8, bottom: 4),
-                child: NeuIconButton(
-                  icon: Icons.settings_rounded,
-                  size: 36,
-                  iconSize: 18,
-                  onPressed: onSettings,
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (var index = 0; index < labels.length; index++)
+                        _RailTab(
+                          label: labels[index],
+                          isSelected: index == selectedIndex,
+                          onTap: () => onSelected(index),
+                        ),
+                    ],
+                  ),
                 ),
               ),
+              if (onSettings != null) ...[
+                const Padding(
+                  padding: EdgeInsets.only(top: 8),
+                  child: _ThemeSlider(compact: true),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8, bottom: 4),
+                  child: NeuIconButton(
+                    icon: Icons.settings_rounded,
+                    size: 36,
+                    iconSize: 18,
+                    onPressed: onSettings,
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -110,17 +124,18 @@ class _DockRail extends StatelessWidget {
             child: _AppMark(size: 40),
           ),
           Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                for (var index = 0; index < labels.length; index++)
-                  _RailTab(
-                    label: labels[index],
-                    isSelected: index == selectedIndex,
-                    onTap: () => onSelected(index),
-                    dock: true,
-                  ),
-              ],
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  for (var index = 0; index < labels.length; index++)
+                    _RailTab(
+                      label: labels[index],
+                      isSelected: index == selectedIndex,
+                      onTap: () => onSelected(index),
+                      dock: true,
+                    ),
+                ],
+              ),
             ),
           ),
           if (onSettings != null) ...[
@@ -238,7 +253,7 @@ class _RailTab extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: EdgeInsets.symmetric(vertical: dock ? 28 : 22),
+        padding: EdgeInsets.symmetric(vertical: dock ? 14 : 12),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

@@ -17,7 +17,7 @@ import 'neu_container.dart';
 import 'neu_icon_button.dart';
 
 /// Shown in the hero, the About card and hub subtitles; mirrors pubspec.
-const _appVersion = '1.0.0';
+const _appVersion = '1.1.0';
 const _company = 'Acorn Associated';
 const _place = 'Qamishli';
 

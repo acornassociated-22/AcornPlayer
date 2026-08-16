@@ -6,15 +6,14 @@ import '../theme/acorn_palette.dart';
 import '../theme/app_colors.dart';
 import '../theme/neu_style.dart';
 import '../state/player_controller.dart';
-import 'home_indicator.dart';
 import 'neu_icon_button.dart';
 import 'playback_modes.dart';
 import 'progress_bar.dart';
 import 'song_artwork.dart';
 import 'volume_dial.dart';
 
-/// Bottom bar showing the current track. Narrow windows get a single play
-/// button, wider ones get the full previous / play / next row.
+/// Bottom bar showing the current track. Narrow windows keep prev / play /
+/// next; wider ones also show modes and the queue button.
 class MiniPlayer extends StatelessWidget {
   const MiniPlayer({
     super.key,
@@ -69,6 +68,7 @@ class MiniPlayer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isWide = MediaQuery.sizeOf(context).width >= _wideBreakpoint;
+    final bottomInset = isWide ? 0.0 : MediaQuery.paddingOf(context).bottom;
     final wave = TrackProgressBar(
       position: position,
       duration: duration,
@@ -93,7 +93,7 @@ class MiniPlayer extends StatelessWidget {
             ),
       padding: isWide
           ? const EdgeInsets.fromLTRB(24, 12, 24, 12)
-          : const EdgeInsets.fromLTRB(16, 14, 16, 6),
+          : EdgeInsets.fromLTRB(12, 10, 12, 8 + bottomInset),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -102,20 +102,24 @@ class MiniPlayer extends StatelessWidget {
               GestureDetector(
                 onTap: onTap,
                 child: SizedBox(
-                  width: 54,
-                  height: 54,
-                  child: SongArtwork(song: song, radius: 12, iconSize: 22),
+                  width: isWide ? 54 : 48,
+                  height: isWide ? 54 : 48,
+                  child: SongArtwork(
+                    song: song,
+                    radius: 12,
+                    iconSize: isWide ? 22 : 18,
+                  ),
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 10),
               Expanded(
                 child: GestureDetector(
                   onTap: onTap,
                   behavior: HitTestBehavior.opaque,
-                  child: _TrackLabel(song: song),
+                  child: _TrackLabel(song: song, compact: !isWide),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               if (isWide &&
                   onToggleRepeat != null &&
                   onToggleShuffle != null &&
@@ -131,36 +135,36 @@ class MiniPlayer extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
               ],
-              if (isWide && onPrevious != null) ...[
+              if (onPrevious != null) ...[
                 NeuIconButton(
                   icon: Icons.skip_previous_rounded,
-                  size: 40,
-                  iconSize: 19,
+                  size: isWide ? 40 : 36,
+                  iconSize: isWide ? 19 : 18,
                   onPressed: onPrevious,
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: isWide ? 12 : 6),
               ],
               NeuIconButton(
                 icon: isPlaying
                     ? Icons.pause_rounded
                     : Icons.play_arrow_rounded,
-                size: 46,
-                iconSize: 22,
+                size: isWide ? 46 : 40,
+                iconSize: isWide ? 22 : 20,
                 fill: AppColors.accent,
                 iconColor: AppColors.textPrimary,
                 glowColor: AppColors.accent,
                 onPressed: onTogglePlay,
               ),
-              if (isWide && onNext != null) ...[
-                const SizedBox(width: 12),
+              if (onNext != null) ...[
+                SizedBox(width: isWide ? 12 : 6),
                 NeuIconButton(
                   icon: Icons.skip_next_rounded,
-                  size: 40,
-                  iconSize: 19,
+                  size: isWide ? 40 : 36,
+                  iconSize: isWide ? 19 : 18,
                   onPressed: onNext,
                 ),
               ],
-              if (onQueue != null) ...[
+              if (isWide && onQueue != null) ...[
                 const SizedBox(width: 10),
                 NeuIconButton(
                   icon: Icons.queue_music_rounded,
@@ -169,18 +173,17 @@ class MiniPlayer extends StatelessWidget {
                   onPressed: onQueue,
                 ),
               ],
-              const SizedBox(width: 14),
+              SizedBox(width: isWide ? 14 : 8),
               VolumeDial(
                 value: volume,
                 onChanged: onVolume,
                 onToggleMute: onToggleMute,
-                size: isWide ? 76 : 64,
+                size: isWide ? 76 : 52,
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           wave,
-          if (!isWide) ...[const SizedBox(height: 10), const HomeIndicator()],
         ],
       ),
     );
@@ -188,17 +191,20 @@ class MiniPlayer extends StatelessWidget {
 }
 
 class _TrackLabel extends StatelessWidget {
-  const _TrackLabel({required this.song});
+  const _TrackLabel({required this.song, this.compact = false});
 
   final Song song;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(context.t('nowPlaying'), style: context.styleMiniLabel),
-        const SizedBox(height: 5),
+        if (!compact) ...[
+          Text(context.t('nowPlaying'), style: context.styleMiniLabel),
+          const SizedBox(height: 5),
+        ],
         Text(
           song.artist,
           maxLines: 1,

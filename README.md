@@ -13,8 +13,8 @@
 <p align="center">
   <a href="https://github.com/acornassociated-22/AcornPlayer/releases/latest"><img src="https://img.shields.io/github/v/release/acornassociated-22/AcornPlayer?label=release&style=for-the-badge&color=E11D2E" alt="Release" /></a>
   <a href="https://github.com/acornassociated-22/AcornPlayer/stargazers"><img src="https://img.shields.io/github/stars/acornassociated-22/AcornPlayer?style=for-the-badge&color=242430&labelColor=141416" alt="Stars" /></a>
-  <a href="https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.0.0.apk"><img src="https://img.shields.io/badge/Android-APK-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android APK" /></a>
-  <a href="https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.0.0_amd64.deb"><img src="https://img.shields.io/badge/Linux-.deb-E95420?style=for-the-badge&logo=linux&logoColor=white" alt="Linux deb" /></a>
+  <a href="https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.1.0.apk"><img src="https://img.shields.io/badge/Android-APK-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android APK" /></a>
+  <a href="https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.1.0_amd64.deb"><img src="https://img.shields.io/badge/Linux-.deb-E95420?style=for-the-badge&logo=linux&logoColor=white" alt="Linux deb" /></a>
 </p>
 
 <p align="center">
@@ -51,17 +51,17 @@
     <tr>
       <td><strong>Linux</strong> (x64)</td>
       <td><code>.deb</code></td>
-      <td><a href="https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.0.0_amd64.deb"><strong>Download .deb</strong></a></td>
+      <td><a href="https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.1.0_amd64.deb"><strong>Download .deb</strong></a></td>
     </tr>
     <tr>
       <td><strong>Linux</strong> (portable)</td>
       <td><code>.tar.gz</code></td>
-      <td><a href="https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.0.0_linux_x64.tar.gz">Download archive</a></td>
+      <td><a href="https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.1.0_linux_x64.tar.gz">Download archive</a></td>
     </tr>
     <tr>
       <td><strong>Android</strong> (universal)</td>
       <td><code>.apk</code></td>
-      <td><a href="https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.0.0.apk"><strong>Download APK</strong></a></td>
+      <td><a href="https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.1.0.apk"><strong>Download APK</strong></a></td>
     </tr>
     <tr>
       <td><strong>Windows</strong> (x64)</td>
@@ -157,9 +157,9 @@
 </table>
 
 <p align="center">
-  <a href="https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.0.0.apk"><img src="https://img.shields.io/badge/Get_it_on-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Get it on Android" /></a>
+  <a href="https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.1.0.apk"><img src="https://img.shields.io/badge/Get_it_on-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Get it on Android" /></a>
   &nbsp;
-  <a href="https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.0.0_ios_unsigned.ipa"><img src="https://img.shields.io/badge/Sideload-iOS-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Sideload on iOS" /></a>
+  <a href="https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.1.0_ios_unsigned.ipa"><img src="https://img.shields.io/badge/Sideload-iOS-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Sideload on iOS" /></a>
 </p>
 
 ---
@@ -211,7 +211,7 @@
 <summary><strong>Linux</strong></summary>
 
 ```bash
-sudo apt install ./acorn-player_1.0.0_amd64.deb
+sudo apt install ./acorn-player_1.1.0_amd64.deb
 acorn-player
 ```
 
@@ -222,7 +222,7 @@ Or use the portable archive: extract and run `./install.sh` (per-user) or `./aco
 <details>
 <summary><strong>Android</strong></summary>
 
-1. Download the **[APK](https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.0.0.apk)** and allow install from unknown sources.
+1. Download the **[APK](https://github.com/acornassociated-22/AcornPlayer/releases/latest/download/acorn-player_1.1.0.apk)** and allow install from unknown sources.
 2. Open Acorn Player → grant audio permission → pick your music folder.
 
 </details>

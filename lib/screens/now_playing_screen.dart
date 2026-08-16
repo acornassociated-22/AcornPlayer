@@ -13,7 +13,6 @@ import '../theme/app_colors.dart';
 import '../widgets/action_sheet.dart';
 import '../widgets/album_carousel.dart';
 import '../widgets/app_top_bar.dart';
-import '../widgets/home_indicator.dart';
 import '../widgets/lyrics_view.dart';
 import '../widgets/neu_icon_button.dart';
 import '../widgets/playback_modes.dart';
@@ -34,10 +33,6 @@ const _gapProgress = 50.0;
 const _gapTransport = 26.0;
 const _gapBottom = 10.0;
 const _coverHeight = 280.0;
-
-/// Combined height of the rows that never shrink: app bar, track details, seek
-/// bar, transport and the home pill. The cover gets whatever is left.
-const _fixedRowsHeight = 226.0;
 
 /// Full player: cover carousel, track details, seek bar and transport.
 class NowPlayingScreen extends StatefulWidget {
@@ -89,23 +84,10 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                     builder: (context, box) {
                       // Every gap keeps its phone proportion: at the 844 design
                       // height the layout is unchanged, shorter windows tighten up.
-                      final scale = (box.maxHeight / _designHeight).clamp(0.5, 1.0);
+                      final scale = (box.maxHeight / _designHeight).clamp(0.4, 1.0);
+                      final gapScale = scale < 0.8 ? scale * 0.7 : scale;
                       final wide = box.maxWidth >= _wideBreakpoint;
-                      final gaps =
-                          (_gapTop +
-                                  _gapCover +
-                                  _gapDetails +
-                                  _gapProgress +
-                                  _gapTransport) *
-                              scale +
-                          _gapBottom;
                       final maxCover = wide ? 380.0 : _coverHeight * scale;
-                      final coverHeight =
-                          (box.maxHeight -
-                                  _fixedRowsHeight -
-                                  gaps -
-                                  (wide ? 0 : 128))
-                              .clamp(120.0, maxCover);
                       final contentWidth = wide
                           ? math.min(box.maxWidth * 0.82, _desktopContentMaxWidth)
                           : _phoneContentMaxWidth;
@@ -116,7 +98,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                           child: Padding(
                             padding: EdgeInsets.fromLTRB(
                               22,
-                              _gapTop * scale,
+                              _gapTop * gapScale,
                               22,
                               _gapBottom,
                             ),
@@ -137,35 +119,40 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                                     song,
                                   ),
                                 ),
-                                SizedBox(height: _gapCover * scale),
-                                _Cover(
-                                  clip: wide,
-                                  child: _showLyrics && _lyrics != null
-                                      ? SizedBox(
-                                          height: coverHeight,
-                                          child: LyricsView(
-                                            lyrics: _lyrics!,
-                                            position: player.position,
-                                          ),
-                                        )
-                                      : AlbumCarousel(
-                                          songs: player.queue,
-                                          currentIndex: player.index,
-                                          onIndexChanged: player.playAt,
-                                          height: coverHeight,
-                                          wide: wide,
-                                          isPlaying: player.isPlaying,
-                                          progress: player.progress,
-                                        ),
+                                SizedBox(height: _gapCover * gapScale),
+                                Flexible(
+                                  child: LayoutBuilder(
+                                    builder: (context, coverBox) {
+                                      final coverHeight = coverBox.maxHeight
+                                          .clamp(80.0, maxCover);
+                                      return _Cover(
+                                        clip: wide,
+                                        child: _showLyrics && _lyrics != null
+                                            ? LyricsView(
+                                                lyrics: _lyrics!,
+                                                position: player.position,
+                                              )
+                                            : AlbumCarousel(
+                                                songs: player.queue,
+                                                currentIndex: player.index,
+                                                onIndexChanged: player.playAt,
+                                                height: coverHeight,
+                                                wide: wide,
+                                                isPlaying: player.isPlaying,
+                                                progress: player.progress,
+                                              ),
+                                      );
+                                    },
+                                  ),
                                 ),
-                                SizedBox(height: _gapDetails * scale),
+                                SizedBox(height: _gapDetails * gapScale),
                                 _TrackDetails(
                                   song: song,
                                   isLiked: library.isLiked(song),
                                   onToggleLike: () => library.toggleLike(song),
                                   onClose: () => Navigator.of(context).maybePop(),
                                 ),
-                                SizedBox(height: _gapProgress * scale),
+                                SizedBox(height: _gapProgress * gapScale),
                                 TrackProgressBar(
                                   position: player.position,
                                   duration: player.duration,
@@ -173,7 +160,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                                   seed: song.id,
                                   isPlaying: player.isPlaying,
                                 ),
-                                const Spacer(),
+                                SizedBox(height: 12 * gapScale),
                                 PlaybackModeBar(
                                   repeat: player.repeat,
                                   shuffle: player.shuffle,
@@ -182,7 +169,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                                   onToggleShuffle: player.toggleShuffle,
                                   onCycleSpeed: player.cycleSpeed,
                                 ),
-                                SizedBox(height: 16 * scale),
+                                SizedBox(height: 12 * gapScale),
                                 _TransportControls(
                                   isPlaying: player.isPlaying,
                                   onPrevious: player.previous,
@@ -193,8 +180,8 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                                   onToggleMute: player.toggleMute,
                                   wide: wide,
                                 ),
-                                SizedBox(height: _gapTransport * scale),
-                                if (!wide) const HomeIndicator(),
+                                if (wide)
+                                  SizedBox(height: _gapTransport * gapScale),
                               ],
                             ),
                           ),
@@ -202,7 +189,8 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                       );
                     },
                   ),
-                  const _TitleBarShade(),
+                  if (MediaQuery.sizeOf(context).width >= _wideBreakpoint)
+                    const _TitleBarShade(),
                 ],
               ),
       ),

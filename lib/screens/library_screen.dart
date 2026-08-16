@@ -97,15 +97,16 @@ class LibraryScreen extends StatelessWidget {
       ],
     );
   }
+}
 
-  Future<void> _createPlaylist(
-    BuildContext context,
-    LibraryController library,
-  ) async {
-    final name = await showNamePrompt(context, title: context.t('newPlaylist'));
-    if (name == null || name.isEmpty) return;
-    await library.createPlaylist(name);
-  }
+/// Asks for a name and creates a playlist.
+Future<void> _createPlaylist(
+  BuildContext context,
+  LibraryController library,
+) async {
+  final name = await showNamePrompt(context, title: context.t('newPlaylist'));
+  if (name == null || name.isEmpty) return;
+  await library.createPlaylist(name);
 }
 
 /// Picks how the current song list is ordered.
@@ -146,18 +147,22 @@ class _LibraryMain extends StatelessWidget {
   final bool wide;
   final VoidCallback onMenu;
 
-  /// List/grid toggle and sort, only on song views.
-  Widget? _layoutToggle(BuildContext context, LibraryController library) {
-    if (library.view != LibraryView.songs) return null;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
+  /// Sort/grid on song views; a create button on the playlists list.
+  Widget? _trailing(BuildContext context, LibraryController library) {
+    final buttons = <Widget>[
+      if (library.tab == LibraryTab.playlists &&
+          library.selectedPlaylistId == null)
+        NeuIconButton(
+          icon: Icons.add_rounded,
+          iconSize: 18,
+          onPressed: () => _createPlaylist(context, library),
+        ),
+      if (library.view == LibraryView.songs) ...[
         NeuIconButton(
           icon: Icons.sort_rounded,
           iconSize: 18,
           onPressed: () => _showSortMenu(context, library),
         ),
-        const SizedBox(width: 8),
         NeuIconButton(
           icon: library.gridSongs
               ? Icons.view_list_rounded
@@ -165,6 +170,16 @@ class _LibraryMain extends StatelessWidget {
           iconSize: 18,
           onPressed: library.toggleSongLayout,
         ),
+      ],
+    ];
+    if (buttons.isEmpty) return null;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var i = 0; i < buttons.length; i++) ...[
+          if (i > 0) const SizedBox(width: 8),
+          buttons[i],
+        ],
       ],
     );
   }
@@ -184,7 +199,7 @@ class _LibraryMain extends StatelessWidget {
                           title: library.titleFor(context.strings),
                           onBack: library.canGoBack ? library.goBack : null,
                           onMore: onMenu,
-                          trailing: _layoutToggle(context, library),
+                          trailing: _trailing(context, library),
                         ),
                       ),
                       const Padding(
@@ -217,7 +232,7 @@ class _LibraryMain extends StatelessWidget {
                         title: library.titleFor(context.strings),
                         onBack: library.canGoBack ? library.goBack : null,
                         onMore: onMenu,
-                        trailing: _layoutToggle(context, library),
+                        trailing: _trailing(context, library),
                       ),
                     ),
                     Expanded(
@@ -426,6 +441,8 @@ class _SongSearchFieldState extends State<_SongSearchField> {
             child: TextField(
               controller: _controller,
               onChanged: _handleChanged,
+              onSubmitted: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+              onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
               style: context.styleMiniLabel.copyWith(
                 color: palette.textPrimary,
                 fontSize: 13,
@@ -548,6 +565,7 @@ class _SongList extends StatelessWidget {
           : library.selectedPlaylistId != null
           ? ReorderableListView.builder(
               key: const ValueKey('playlist'),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               padding: const EdgeInsets.only(right: 20, top: 4, bottom: 20),
               itemCount: songs.length,
               onReorderItem: library.reorderPlaylistSongs,
@@ -558,13 +576,17 @@ class _SongList extends StatelessWidget {
                   song: song,
                   isActive: player.current == song,
                   isPlaying: player.isPlaying,
-                  onTap: () => player.playQueue(songs, index),
+                  onTap: () {
+                    FocusManager.instance.primaryFocus?.unfocus();
+                    player.playQueue(songs, index);
+                  },
                   onMore: () => _showSongMenu(context, song),
                 );
               },
             )
           : ListView.builder(
               key: const ValueKey('list'),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               padding: const EdgeInsets.only(right: 20, top: 4, bottom: 20),
               itemCount: songs.length,
               itemBuilder: (context, index) {
@@ -573,7 +595,10 @@ class _SongList extends StatelessWidget {
                   song: song,
                   isActive: player.current == song,
                   isPlaying: player.isPlaying,
-                  onTap: () => player.playQueue(songs, index),
+                  onTap: () {
+                    FocusManager.instance.primaryFocus?.unfocus();
+                    player.playQueue(songs, index);
+                  },
                   onMore: () => _showSongMenu(context, song),
                 );
               },
@@ -641,6 +666,7 @@ class _SongGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final wide = MediaQuery.sizeOf(context).width >= _wideBreakpoint;
     return GridView.builder(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsets.fromLTRB(16, 10, 22, 22),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: wide ? 4 : 2,
@@ -656,7 +682,10 @@ class _SongGrid extends StatelessWidget {
           isActive: player.current == song,
           isPlaying: player.isPlaying,
           progress: player.current == song ? player.progress : 0,
-          onTap: () => player.playQueue(songs, index),
+          onTap: () {
+            FocusManager.instance.primaryFocus?.unfocus();
+            player.playQueue(songs, index);
+          },
           onMore: () => onMore(song),
         );
       },
@@ -681,6 +710,7 @@ class _AlbumList extends StatelessWidget {
     }
 
     return ListView.builder(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsets.only(right: 20, top: 4, bottom: 20),
       itemCount: albums.length,
       itemBuilder: (context, index) => _CollectionRow(
@@ -703,14 +733,19 @@ class _PlaylistList extends StatelessWidget {
   Widget build(BuildContext context) {
     final playlists = library.visiblePlaylists;
     if (playlists.isEmpty) {
+      final searching = library.query.trim().isNotEmpty;
       return _Notice(
-        message: library.query.trim().isNotEmpty
+        message: searching
             ? context.t('noSearchResults')
             : context.t('noPlaylists'),
+        actionLabel: searching ? null : context.t('newPlaylist'),
+        actionIcon: Icons.add_rounded,
+        onAction: searching ? null : () => _createPlaylist(context, library),
       );
     }
 
     return ListView.builder(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsets.only(right: 20, top: 4, bottom: 20),
       itemCount: playlists.length,
       itemBuilder: (context, index) => _CollectionRow(
@@ -741,6 +776,7 @@ class _ArtistList extends StatelessWidget {
       );
     }
     return ListView.builder(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsets.only(right: 20, top: 4, bottom: 20),
       itemCount: artists.length,
       itemBuilder: (context, index) => _CollectionRow(
@@ -770,6 +806,7 @@ class _GenreList extends StatelessWidget {
       );
     }
     return ListView.builder(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsets.only(right: 20, top: 4, bottom: 20),
       itemCount: genres.length,
       itemBuilder: (context, index) => _CollectionRow(

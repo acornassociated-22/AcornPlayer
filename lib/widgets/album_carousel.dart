@@ -41,8 +41,8 @@ class _AlbumCarouselState extends State<AlbumCarousel>
   static const _neighbours = 2;
   static const _flingVelocity = 320.0;
 
-  static const _phoneCardFactor = 0.48;
-  static const _phoneSlotFactor = 0.22;
+  static const _phoneCardFactor = 0.52;
+  static const _phoneSlotFactor = 0.28;
   static const _wideCardFactor = 0.56;
   static const _wideSlotFactor = 0.28;
 
@@ -69,15 +69,9 @@ class _AlbumCarouselState extends State<AlbumCarousel>
   @override
   void didUpdateWidget(AlbumCarousel oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final songsChanged = !identical(widget.songs, oldWidget.songs);
-    if (songsChanged) {
-      _settle.stop();
-      _page = widget.currentIndex.toDouble();
-      return;
-    }
     if (widget.currentIndex == oldWidget.currentIndex) return;
-    if (_page.round() == widget.currentIndex) return;
-    _moveTo(widget.currentIndex.toDouble());
+    if (_nearestIndex(_page) == widget.currentIndex) return;
+    _moveTo(widget.currentIndex);
   }
 
   @override
@@ -86,28 +80,40 @@ class _AlbumCarouselState extends State<AlbumCarousel>
     super.dispose();
   }
 
-  void _moveTo(double target) {
-    if ((target - _page).abs() > 1.5) {
-      _settle.stop();
-      setState(() => _page = target);
+  /// Animates to [target], wrapping last→first (and back) by one slot.
+  void _moveTo(int target) {
+    final n = widget.songs.length;
+    if (n <= 1) {
+      setState(() => _page = target.toDouble());
       return;
     }
-    _settleTween = Tween<double>(begin: _page, end: target).animate(
+    var visual = target.toDouble();
+    final current = _nearestIndex(_page);
+    if (current == n - 1 && target == 0) {
+      visual = _page.roundToDouble() + 1;
+    } else if (current == 0 && target == n - 1) {
+      visual = _page.roundToDouble() - 1;
+    }
+    _settleTween = Tween<double>(begin: _page, end: visual).animate(
       CurvedAnimation(parent: _settle, curve: Curves.easeOutCubic),
     );
-    _settle.forward(from: 0);
+    _settle.forward(from: 0).whenComplete(() {
+      if (!mounted) return;
+      setState(() => _page = target.toDouble());
+    });
   }
 
   void handleDragStart(DragStartDetails details) {
     _settle.stop();
+    _page = _nearestIndex(_page).toDouble();
     _dragStartPage = _page;
   }
 
   void handleDragUpdate(DragUpdateDetails details) {
+    final n = widget.songs.length;
+    if (n <= 1) return;
     final delta = (details.primaryDelta ?? 0) / _slotWidth;
-    setState(() {
-      _page = (_page - delta).clamp(0.0, (widget.songs.length - 1).toDouble());
-    });
+    setState(() => _page = _page - delta);
   }
 
   void handleDragEnd(DragEndDetails details) {
@@ -115,7 +121,7 @@ class _AlbumCarouselState extends State<AlbumCarousel>
     if (last <= 0) return;
     final velocity = details.primaryVelocity ?? 0;
     final flung = velocity.abs() > _flingVelocity;
-    var target = flung
+    final target = flung
         ? _dragStartPage.round() + (velocity < 0 ? 1 : -1)
         : _page.round();
     handleGoTo(_wrapIndex(target));
@@ -139,17 +145,29 @@ class _AlbumCarouselState extends State<AlbumCarousel>
 
   /// Settles the coverflow and notifies the player.
   void handleGoTo(int target) {
-    _moveTo(target.toDouble());
+    _moveTo(target);
     if (target != widget.currentIndex) widget.onIndexChanged(target);
   }
 
   /// Wraps [index] around the queue.
   int _wrapIndex(int index) {
-    final last = widget.songs.length - 1;
-    if (last <= 0) return 0;
-    if (index < 0) return last;
-    if (index > last) return 0;
-    return index;
+    final n = widget.songs.length;
+    if (n <= 0) return 0;
+    return (index % n + n) % n;
+  }
+
+  /// Song index nearest to the (possibly unwrapped) page value.
+  int _nearestIndex(double page) => _wrapIndex(page.round());
+
+  /// Shortest signed slot distance from [_page] to [index], wrapping.
+  double _visualOffset(int index) {
+    final n = widget.songs.length;
+    if (n <= 1) return index - _page;
+    var offset = index - _page;
+    offset %= n;
+    if (offset > n / 2) offset -= n;
+    if (offset < -n / 2) offset += n;
+    return offset;
   }
 
   @override
@@ -178,7 +196,10 @@ class _AlbumCarouselState extends State<AlbumCarousel>
         _cardLeft = left;
 
         final indices = _visibleIndices()
-          ..sort((a, b) => (_page - b).abs().compareTo((_page - a).abs()));
+          ..sort(
+            (a, b) =>
+                _visualOffset(b).abs().compareTo(_visualOffset(a).abs()),
+          );
 
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
@@ -203,11 +224,14 @@ class _AlbumCarouselState extends State<AlbumCarousel>
   }
 
   List<int> _visibleIndices() {
+    final n = widget.songs.length;
+    if (n == 0) return const [];
     final centre = _page.round();
-    return [
-      for (var i = centre - _neighbours; i <= centre + _neighbours; i++)
-        if (i >= 0 && i < widget.songs.length) i,
-    ];
+    final seen = <int>{};
+    for (var i = centre - _neighbours; i <= centre + _neighbours; i++) {
+      seen.add(_wrapIndex(i));
+    }
+    return seen.toList();
   }
 
   Widget _buildCard(
@@ -216,7 +240,7 @@ class _AlbumCarouselState extends State<AlbumCarousel>
     double cardHeight,
     double left,
   ) {
-    final offset = index - _page;
+    final offset = _visualOffset(index);
     final motion = _CardMotion.fromOffset(offset);
     final focused = motion.focus > 0.85;
 
