@@ -29,8 +29,8 @@ exec /usr/lib/$PKG_NAME/$BINARY_NAME "\$@"
 EOF
 chmod 755 "$DEB_ROOT/usr/bin/$PKG_NAME"
 
-write_desktop_entry "$DEB_ROOT/usr/share/applications/$PKG_NAME.desktop" "$PKG_NAME %U"
-render_icons "$DEB_ROOT/usr/share/icons/hicolor" 16 32 48 64 128 256 512
+write_desktop_entry "$DEB_ROOT/usr/share/applications/$APP_ID.desktop" "$PKG_NAME %U"
+render_icons "$DEB_ROOT/usr/share/icons/hicolor" 16 24 32 48 64 96 128 256 512
 
 INSTALLED_KB="$(du -sk "$DEB_ROOT" | cut -f1)"
 cat > "$DEB_ROOT/DEBIAN/control" <<EOF
@@ -60,7 +60,7 @@ rm -rf "$TAR_ROOT"
 mkdir -p "$TAR_ROOT"
 cp -r "$BUNDLE"/. "$TAR_ROOT/"
 cp "$ICON_SOURCE" "$TAR_ROOT/$PKG_NAME.png"
-write_desktop_entry "$TAR_ROOT/$PKG_NAME.desktop" "$PKG_NAME %U"
+write_desktop_entry "$TAR_ROOT/$APP_ID.desktop" "$PKG_NAME %U"
 
 cat > "$TAR_ROOT/install.sh" <<EOF
 #!/usr/bin/env bash
@@ -74,8 +74,8 @@ mkdir -p "\$APP_DIR" "\$PREFIX/bin" "\$PREFIX/share/applications" "\$PREFIX/shar
 cp -r "\$HERE"/. "\$APP_DIR/"
 ln -sf "\$APP_DIR/$BINARY_NAME" "\$PREFIX/bin/$PKG_NAME"
 cp "\$HERE/$PKG_NAME.png" "\$PREFIX/share/icons/hicolor/512x512/apps/$PKG_NAME.png"
-sed "s|^Exec=.*|Exec=\$PREFIX/bin/$PKG_NAME %U|" "\$HERE/$PKG_NAME.desktop" \\
-  > "\$PREFIX/share/applications/$PKG_NAME.desktop"
+sed "s|^Exec=.*|Exec=\$PREFIX/bin/$PKG_NAME %U|" "\$HERE/$APP_ID.desktop" \\
+  > "\$PREFIX/share/applications/$APP_ID.desktop"
 
 echo "Installed. Run '$PKG_NAME' or launch Acorn Player from your app menu."
 echo "Needs libmpv2 and GTK 3: sudo apt install libmpv2 libgtk-3-0"

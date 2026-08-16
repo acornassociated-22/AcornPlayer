@@ -40,6 +40,7 @@ PY
 }
 
 # Write the shared freedesktop entry; $1 is the destination file, $2 the Exec value.
+# The file must be named $APP_ID.desktop so GNOME on Wayland maps the window to it.
 write_desktop_entry() {
   local dest="$1"
   local exec_line="$2"
@@ -54,6 +55,7 @@ Icon=$PKG_NAME
 Terminal=false
 Categories=AudioVideo;Audio;Player;
 MimeType=audio/mpeg;audio/flac;audio/x-wav;audio/mp4;audio/ogg;audio/x-m4a;
-StartupWMClass=$BINARY_NAME
+StartupWMClass=$APP_ID
+StartupNotify=true
 EOF
 }
