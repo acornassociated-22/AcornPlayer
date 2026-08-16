@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/song.dart';
+import '../services/lyrics_service.dart';
 import '../state/library_controller.dart';
 import '../state/player_controller.dart';
 import '../state/settings_controller.dart';
@@ -13,9 +14,11 @@ import '../widgets/action_sheet.dart';
 import '../widgets/album_carousel.dart';
 import '../widgets/app_top_bar.dart';
 import '../widgets/home_indicator.dart';
+import '../widgets/lyrics_view.dart';
 import '../widgets/neu_icon_button.dart';
 import '../widgets/playback_modes.dart';
 import '../widgets/progress_bar.dart';
+import '../widgets/queue_panel.dart';
 import '../widgets/volume_dial.dart';
 
 const _designHeight = 844.0;
@@ -37,14 +40,37 @@ const _coverHeight = 280.0;
 const _fixedRowsHeight = 226.0;
 
 /// Full player: cover carousel, track details, seek bar and transport.
-class NowPlayingScreen extends StatelessWidget {
+class NowPlayingScreen extends StatefulWidget {
   const NowPlayingScreen({super.key});
+
+  @override
+  State<NowPlayingScreen> createState() => _NowPlayingScreenState();
+}
+
+class _NowPlayingScreenState extends State<NowPlayingScreen> {
+  final _lyricsService = LyricsService();
+  String? _lyricsSongId;
+  Lyrics? _lyrics;
+  bool _showLyrics = false;
+
+  /// Loads lyrics whenever the current track changes.
+  Future<void> _loadLyrics(Song? song) async {
+    if (song == null || song.id == _lyricsSongId) return;
+    _lyricsSongId = song.id;
+    final lyrics = await _lyricsService.load(song);
+    if (!mounted || _lyricsSongId != song.id) return;
+    setState(() {
+      _lyrics = lyrics;
+      if (lyrics == null) _showLyrics = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final player = context.watch<PlayerController>();
     final library = context.watch<LibraryController>();
     final song = player.current;
+    _loadLyrics(song);
 
     return Scaffold(
       backgroundColor: context.palette.background,
@@ -99,20 +125,38 @@ class NowPlayingScreen extends StatelessWidget {
                                 AppTopBar(
                                   title: library.title,
                                   onBack: () => Navigator.of(context).maybePop(),
-                                  onMore: () => _showMenu(context, library, song),
+                                  trailing: NeuIconButton(
+                                    icon: Icons.queue_music_rounded,
+                                    iconSize: 18,
+                                    onPressed: () => QueuePanel.open(context),
+                                  ),
+                                  onMore: () => _showMenu(
+                                    context,
+                                    library,
+                                    player,
+                                    song,
+                                  ),
                                 ),
                                 SizedBox(height: _gapCover * scale),
                                 _Cover(
                                   clip: wide,
-                                  child: AlbumCarousel(
-                                    songs: player.queue,
-                                    currentIndex: player.index,
-                                    onIndexChanged: player.playAt,
-                                    height: coverHeight,
-                                    wide: wide,
-                                    isPlaying: player.isPlaying,
-                                    progress: player.progress,
-                                  ),
+                                  child: _showLyrics && _lyrics != null
+                                      ? SizedBox(
+                                          height: coverHeight,
+                                          child: LyricsView(
+                                            lyrics: _lyrics!,
+                                            position: player.position,
+                                          ),
+                                        )
+                                      : AlbumCarousel(
+                                          songs: player.queue,
+                                          currentIndex: player.index,
+                                          onIndexChanged: player.playAt,
+                                          height: coverHeight,
+                                          wide: wide,
+                                          isPlaying: player.isPlaying,
+                                          progress: player.progress,
+                                        ),
                                 ),
                                 SizedBox(height: _gapDetails * scale),
                                 _TrackDetails(
@@ -165,11 +209,29 @@ class NowPlayingScreen extends StatelessWidget {
     );
   }
 
-  void _showMenu(BuildContext context, LibraryController library, Song song) {
+  void _showMenu(
+    BuildContext context,
+    LibraryController library,
+    PlayerController player,
+    Song song,
+  ) {
     showActionSheet(
       context,
       title: song.title,
       items: [
+        if (_lyrics != null)
+          ActionSheetItem(
+            icon: Icons.lyrics_outlined,
+            label: _showLyrics ? context.t('showCover') : context.t('lyrics'),
+            onTap: () => setState(() => _showLyrics = !_showLyrics),
+          ),
+        ActionSheetItem(
+          icon: Icons.bedtime_outlined,
+          label: player.sleep == SleepMode.off
+              ? context.t('sleepTimer')
+              : context.t('sleepOff'),
+          onTap: () => _showSleepMenu(context, player),
+        ),
         ActionSheetItem(
           icon: library.isLiked(song)
               ? Icons.favorite_border
@@ -185,6 +247,40 @@ class NowPlayingScreen extends StatelessWidget {
             label: context.t('addTo', {'name': playlist.name}),
             onTap: () => library.addToPlaylist(playlist.id, song),
           ),
+      ],
+    );
+  }
+
+  void _showSleepMenu(BuildContext context, PlayerController player) {
+    showActionSheet(
+      context,
+      title: context.t('sleepTimer'),
+      items: [
+        ActionSheetItem(
+          icon: Icons.timer_outlined,
+          label: context.t('sleep15'),
+          onTap: () => player.setSleep(SleepMode.minutes15),
+        ),
+        ActionSheetItem(
+          icon: Icons.timer_outlined,
+          label: context.t('sleep30'),
+          onTap: () => player.setSleep(SleepMode.minutes30),
+        ),
+        ActionSheetItem(
+          icon: Icons.timer_outlined,
+          label: context.t('sleep60'),
+          onTap: () => player.setSleep(SleepMode.minutes60),
+        ),
+        ActionSheetItem(
+          icon: Icons.skip_next_outlined,
+          label: context.t('sleepEndOfTrack'),
+          onTap: () => player.setSleep(SleepMode.endOfTrack),
+        ),
+        ActionSheetItem(
+          icon: Icons.timer_off_outlined,
+          label: context.t('sleepOff'),
+          onTap: () => player.setSleep(SleepMode.off),
+        ),
       ],
     );
   }
