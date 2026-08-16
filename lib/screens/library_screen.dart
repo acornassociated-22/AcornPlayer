@@ -9,6 +9,7 @@ import '../theme/acorn_palette.dart';
 import '../widgets/action_sheet.dart';
 import '../widgets/app_top_bar.dart';
 import '../widgets/mini_player.dart';
+import '../widgets/neu_container.dart';
 import '../widgets/neu_icon_button.dart';
 import '../widgets/settings_panel.dart';
 import '../widgets/song_grid_card.dart';
@@ -146,6 +147,16 @@ class _LibraryMain extends StatelessWidget {
                           trailing: _layoutToggle(library),
                         ),
                       ),
+                      if (library.view == LibraryView.songs)
+                        const Padding(
+                          padding: EdgeInsets.fromLTRB(28, 2, 28, 6),
+                          child: Center(
+                            child: SizedBox(
+                              width: 360,
+                              child: _SongSearchField(),
+                            ),
+                          ),
+                        ),
                       Expanded(
                         child: Center(
                           child: ConstrainedBox(
@@ -186,7 +197,33 @@ class _LibraryMain extends StatelessWidget {
                             onSettings: () => SettingsPanel.open(context),
                           ),
                           Expanded(
-                            child: _Body(library: library, player: player),
+                            child: Column(
+                              children: [
+                                if (library.view == LibraryView.songs)
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      8,
+                                      2,
+                                      16,
+                                      8,
+                                    ),
+                                    child: Center(
+                                      child: ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                          maxWidth: 360,
+                                        ),
+                                        child: const _SongSearchField(),
+                                      ),
+                                    ),
+                                  ),
+                                Expanded(
+                                  child: _Body(
+                                    library: library,
+                                    player: player,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -292,6 +329,95 @@ class _ChromeWell extends StatelessWidget {
   }
 }
 
+/// Sunken field that filters the current song list as the user types.
+class _SongSearchField extends StatefulWidget {
+  const _SongSearchField();
+
+  @override
+  State<_SongSearchField> createState() => _SongSearchFieldState();
+}
+
+class _SongSearchFieldState extends State<_SongSearchField> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(
+      text: context.read<LibraryController>().query,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  /// Pushes the typed text into the library filter.
+  void _handleChanged(String value) {
+    context.read<LibraryController>().setQuery(value);
+    setState(() {});
+  }
+
+  /// Clears both the field and the live filter.
+  void _handleClear() {
+    _controller.clear();
+    context.read<LibraryController>().setQuery('');
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return NeuContainer(
+      sunken: true,
+      radius: 16,
+      depth: 2,
+      blur: 6,
+      height: 36,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Row(
+        children: [
+          Icon(Icons.search_rounded, size: 17, color: palette.icon),
+          const SizedBox(width: 8),
+          Expanded(
+            child: TextField(
+              controller: _controller,
+              onChanged: _handleChanged,
+              style: context.styleMiniLabel.copyWith(
+                color: palette.textPrimary,
+                fontSize: 13,
+              ),
+              cursorColor: palette.accent,
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                isDense: true,
+                border: InputBorder.none,
+                hintText: context.t('searchHint'),
+                hintStyle: context.styleMiniLabel.copyWith(fontSize: 13),
+              ),
+            ),
+          ),
+          if (_controller.text.isNotEmpty)
+            GestureDetector(
+              onTap: _handleClear,
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: Icon(
+                  Icons.close_rounded,
+                  size: 16,
+                  color: palette.textSecondary,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 class _Body extends StatelessWidget {
   const _Body({required this.library, required this.player});
 
@@ -338,6 +464,9 @@ class _SongList extends StatelessWidget {
   Widget build(BuildContext context) {
     final songs = library.visibleSongs;
     if (songs.isEmpty) {
+      if (library.query.trim().isNotEmpty) {
+        return _Notice(message: context.t('noSearchResults'));
+      }
       return _Notice(
         message: library.tab == LibraryTab.favorites || library.likedOnly
             ? context.t('noFavorites')

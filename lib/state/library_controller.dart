@@ -33,6 +33,7 @@ class LibraryController extends ChangeNotifier {
   int? _selectedPlaylistId;
   List<String> _selectedPlaylistSongIds = const [];
   String? _folder;
+  String _query = '';
 
   LibraryStatus get status => _status;
 
@@ -51,6 +52,8 @@ class LibraryController extends ChangeNotifier {
   int? get selectedPlaylistId => _selectedPlaylistId;
 
   String? get folder => _folder;
+
+  String get query => _query;
 
   bool get canGoBack => _selectedAlbum != null || _selectedPlaylistId != null;
 
@@ -96,8 +99,16 @@ class LibraryController extends ChangeNotifier {
     return names;
   }
 
-  /// Songs currently listed, honouring album, playlist and liked filters.
+  /// Songs currently listed, honouring album, playlist, liked and search filters.
   List<Song> get visibleSongs {
+    final scoped = _scopedSongs;
+    final needle = _query.trim().toLowerCase();
+    if (needle.isEmpty) return scoped;
+    return scoped.where((song) => _matches(song, needle)).toList();
+  }
+
+  /// Songs in the current tab or opened album/playlist, before search.
+  List<Song> get _scopedSongs {
     if (_selectedAlbum != null) {
       return _songs.where((song) => song.album == _selectedAlbum).toList();
     }
@@ -112,6 +123,20 @@ class LibraryController extends ChangeNotifier {
       return _songs.where((song) => _likedIds.contains(song.id)).toList();
     }
     return _songs;
+  }
+
+  /// Whether [song] title, artist or album contains [needle].
+  bool _matches(Song song, String needle) {
+    return song.title.toLowerCase().contains(needle) ||
+        song.artist.toLowerCase().contains(needle) ||
+        (song.album?.toLowerCase().contains(needle) ?? false);
+  }
+
+  /// Updates the live song filter. Empty text shows the full scoped list.
+  void setQuery(String value) {
+    if (value == _query) return;
+    _query = value;
+    notifyListeners();
   }
 
   bool isLiked(Song song) => _likedIds.contains(song.id);
